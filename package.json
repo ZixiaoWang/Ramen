@@ -1,0 +1,36 @@
+{
+  "name": "ramen",
+  "version": "1.0.0",
+  "description": "A Mock Socket Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZixiaoWang/Ramen.git"
+  },
+  "keywords": [
+    "NodeJS",
+    "Socket",
+    "JavaScript",
+    "WebSocket"
+  ],
+  "author": "Jacky Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ZixiaoWang/Ramen/issues"
+  },
+  "homepage": "https://github.com/ZixiaoWang/Ramen#readme",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "http": "0.0.0",
+    "repl": "^0.1.3",
+    "ws": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/colors": "^1.1.3",
+    "@types/node": "^9.4.6",
+    "typescript": "^2.7.2"
+  }
+}
