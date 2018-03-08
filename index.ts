@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-import { REPL } from './REPL';
 import * as program from 'commander';
+
+import { REPL } from './REPL';
+import { SocketServer } from './SocketServer';
 
 program
     .command('console')
@@ -9,10 +11,7 @@ program
     .action(() => {
         let replServer = new REPL();
         replServer
-            .setCommand('df', () => {
-                console.log('It is working!');
-                replServer.displayPrompt();
-            })
+            .setVariable('SocketServer', SocketServer)
             .console('>>> ');
     })
 

@@ -5,11 +5,13 @@ var REPL = /** @class */ (function () {
     function REPL() {
         this.replOptions = {};
         this.commandList = [];
+        this.variablesList = new Map();
     }
     REPL.prototype.console = function (options) {
         var _this = this;
         if (this.replServer === undefined) {
             this.replServer = repl.start(options || this.replOptions);
+            // 綁定command
             this.commandList.forEach(function (command) {
                 _this.replServer.defineCommand(command.cmd, {
                     help: command.help,
@@ -21,6 +23,10 @@ var REPL = /** @class */ (function () {
                         command.action.apply(_this, args);
                     }
                 });
+            });
+            // 綁定variable
+            this.variablesList.forEach(function (descriptor, key) {
+                Object.defineProperty(_this.replServer.context, key, descriptor);
             });
         }
         return this.replServer;
@@ -100,10 +106,6 @@ var REPL = /** @class */ (function () {
         return this;
     };
     REPL.prototype.setCommand = function (cmd, action, description) {
-        // this.console().defineCommand(cmd, {
-        //     help: description || '',
-        //     action: action
-        // })
         this.commandList.push({
             cmd: cmd,
             help: description || '',
@@ -112,6 +114,9 @@ var REPL = /** @class */ (function () {
         return this;
     };
     REPL.prototype.setVariable = function (key, value, descriptor) {
+        var tempValue = value || undefined;
+        var tempDescriptor = Object.assign({ value: tempValue }, descriptor ? descriptor : null);
+        this.variablesList.set(key, tempDescriptor);
         return this;
     };
     REPL.prototype.displayPrompt = function () {

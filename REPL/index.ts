@@ -8,20 +8,33 @@ export class REPL {
     private replServer: REPLServer;
     private replOptions: ReplOptions = {};
     private commandList: Array<any> = [];
+    private variablesList: Map<string, any> = new Map();
 
     constructor() {}
 
     console(options?: ReplOptions | string): REPLServer {
         if(this.replServer === undefined) {
             this.replServer = repl.start(options || this.replOptions);
+
+            // 綁定command
             this.commandList.forEach(command => {
                 this.replServer.defineCommand(command.cmd, {
                     help: command.help,
                     action: (...args: Array<any>) => {
                         command.action.apply(this, args);
                     }
-                })
-            })
+                });
+            });
+
+            // 綁定variable
+            this.variablesList.forEach((descriptor, key) => {
+                Object.defineProperty(
+                    this.replServer.context,
+                    key,
+                    descriptor
+                );
+            });
+            
         }
         return this.replServer;
     }
@@ -114,10 +127,6 @@ export class REPL {
     }
 
     setCommand(cmd: string, action: Function, description?: string): REPL {
-        // this.console().defineCommand(cmd, {
-        //     help: description || '',
-        //     action: action
-        // })
         this.commandList.push({
             cmd: cmd,
             help: description || '',
@@ -127,6 +136,12 @@ export class REPL {
     }
 
     setVariable(key: string, value?: any, descriptor?: PropertyDescriptor): REPL {
+        let tempValue = value || undefined;
+        let tempDescriptor = Object.assign(
+            { value: tempValue },
+            descriptor ? descriptor : null
+        );
+        this.variablesList.set(key, tempDescriptor);
         return this;
     }
 
