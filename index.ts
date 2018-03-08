@@ -13,7 +13,7 @@ program
                 console.log('It is working!');
                 replServer.displayPrompt();
             })
-            .console();
+            .console('>>> ');
     })
 
 program

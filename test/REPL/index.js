@@ -4,10 +4,24 @@ var repl = require("repl");
 var REPL = /** @class */ (function () {
     function REPL() {
         this.replOptions = {};
+        this.commandList = [];
     }
     REPL.prototype.console = function (options) {
+        var _this = this;
         if (this.replServer === undefined) {
             this.replServer = repl.start(options || this.replOptions);
+            this.commandList.forEach(function (command) {
+                _this.replServer.defineCommand(command.cmd, {
+                    help: command.help,
+                    action: function () {
+                        var args = [];
+                        for (var _i = 0; _i < arguments.length; _i++) {
+                            args[_i] = arguments[_i];
+                        }
+                        command.action.apply(_this, args);
+                    }
+                });
+            });
         }
         return this.replServer;
     };
@@ -86,7 +100,12 @@ var REPL = /** @class */ (function () {
         return this;
     };
     REPL.prototype.setCommand = function (cmd, action, description) {
-        this.console().defineCommand(cmd, {
+        // this.console().defineCommand(cmd, {
+        //     help: description || '',
+        //     action: action
+        // })
+        this.commandList.push({
+            cmd: cmd,
             help: description || '',
             action: action
         });

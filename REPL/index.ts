@@ -5,14 +5,23 @@ import { ReplOptions, REPLServer } from 'repl';
 
 export class REPL {
 
-    private replServer: REPLServer | undefined;
+    private replServer: REPLServer;
     private replOptions: ReplOptions = {};
+    private commandList: Array<any> = [];
 
     constructor() {}
 
     console(options?: ReplOptions | string): REPLServer {
         if(this.replServer === undefined) {
             this.replServer = repl.start(options || this.replOptions);
+            this.commandList.forEach(command => {
+                this.replServer.defineCommand(command.cmd, {
+                    help: command.help,
+                    action: (...args: Array<any>) => {
+                        command.action.apply(this, args);
+                    }
+                })
+            })
         }
         return this.replServer;
     }
@@ -105,10 +114,15 @@ export class REPL {
     }
 
     setCommand(cmd: string, action: Function, description?: string): REPL {
-        this.console().defineCommand(cmd, {
+        // this.console().defineCommand(cmd, {
+        //     help: description || '',
+        //     action: action
+        // })
+        this.commandList.push({
+            cmd: cmd,
             help: description || '',
             action: action
-        })
+        });
         return this;
     }
 
