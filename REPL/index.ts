@@ -11,7 +11,9 @@ export class REPL {
     constructor() {}
 
     console(options?: ReplOptions | string): REPLServer {
-        this.replServer = repl.start(options || this.replOptions);
+        if(this.replServer === undefined) {
+            this.replServer = repl.start(options || this.replOptions);
+        }
         return this.replServer;
     }
 
@@ -103,11 +105,19 @@ export class REPL {
     }
 
     setCommand(cmd: string, action: Function, description?: string): REPL {
+        this.console().defineCommand(cmd, {
+            help: description || '',
+            action: action
+        })
         return this;
     }
 
     setVariable(key: string, value?: any, descriptor?: PropertyDescriptor): REPL {
         return this;
+    }
+
+    displayPrompt(): void{
+        this.console().displayPrompt();
     }
 
     exit(code?: number): void{

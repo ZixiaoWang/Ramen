@@ -1,8 +1,10 @@
-import * as WebSocketModule from 'ws';
+/// <reference types="ws" />
+
+import * as WebSocket from 'ws';
 import * as colors          from 'colors';
 import * as http            from 'http';
 
-import { SocketServerOptions } from './SocketServerOption';
+import { SocketServerOptions } from './index.interface';
 
 interface Address {
     port: number,
@@ -12,7 +14,7 @@ interface Address {
 
 export class SocketServer {
 
-    private $$server: WebSocketModule.Server;
+    private $$server: WebSocket.Server;
     private $$port: number;
 
     public clients: Set<any | WebSocket>;
@@ -28,7 +30,7 @@ export class SocketServer {
             opt = Object.assign(opt, options);
         }
 
-        server = new WebSocketModule.Server(opt, this.oncreate);
+        server = new WebSocket.Server(opt, this.oncreate);
         server.on('connection', this.onconnection);
         server.on('headers', this.onheaders);
         server.on('error', this.onerror);
@@ -43,7 +45,8 @@ export class SocketServer {
     }
 
     onconnection(websocket: WebSocket, request: http.IncomingMessage) {
-        console.log(`New Connection with ${ colors.blue(request.connection.remoteAddress) } has been establshed.`);
+        let remoteAddress = request.connection.remoteAddress || 'undefined';
+        console.log(`New Connection with ${ colors.blue(remoteAddress) } has been establshed.`);
     }
 
     onheaders(headers: Array<any>, request: http.IncomingMessage) {}
