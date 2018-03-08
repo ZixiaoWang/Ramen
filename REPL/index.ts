@@ -145,6 +145,11 @@ export class REPL {
         return this;
     }
 
+    log(...args: Array<any>){
+        console.log(...args);
+        this.displayPrompt();
+    }
+
     displayPrompt(): void{
         this.console().displayPrompt();
     }

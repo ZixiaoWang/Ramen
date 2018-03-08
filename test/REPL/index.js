@@ -119,6 +119,14 @@ var REPL = /** @class */ (function () {
         this.variablesList.set(key, tempDescriptor);
         return this;
     };
+    REPL.prototype.log = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        console.log.apply(console, args);
+        this.displayPrompt();
+    };
     REPL.prototype.displayPrompt = function () {
         this.console().displayPrompt();
     };
