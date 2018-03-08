@@ -19,7 +19,7 @@ function setRelpServer() {
         var name = serverName ? serverName.split(' ')[0] : undefined;
         replServer.displayPrompt();
         setSocketServer(replServer, name);
-    }, "[SOCKET] Quickly set up a server with default port " + PORT)
+    }, "\n\t[SOCKET] Quickly set up a server with default port " + PORT + "\n\te.g. .create [name]")
         .console('>>> ');
 }
 function setSocketServer(replServer, name) {
