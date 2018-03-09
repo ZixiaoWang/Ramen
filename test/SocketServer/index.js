@@ -1,5 +1,4 @@
 "use strict";
-/// <reference types="ws" />
 Object.defineProperty(exports, "__esModule", { value: true });
 var WebSocket = require("ws");
 var colors = require("colors");
@@ -16,13 +15,12 @@ var SocketServer = /** @class */ (function () {
         if (options) {
             opt = Object.assign(opt, options);
         }
-        server = new WebSocket.Server(opt, this.oncreate);
-        server.on('connection', this.onconnection);
-        server.on('listening', this.onlistening);
-        server.on('headers', this.onheaders);
-        server.on('error', this.onerror);
-        this.$$server = server;
-        this.clients = server.clients;
+        this.$$server = new WebSocket.Server(opt, this.oncreate);
+        this.$$server.on('connection', this.onconnection);
+        this.$$server.on('listening', this.onlistening);
+        this.$$server.on('headers', this.onheaders);
+        this.$$server.on('error', this.onerror);
+        this.clients = this.$$server.clients;
     };
     SocketServer.prototype.setOnCreateCallback = function (callback) {
         this.oncreate = (callback && typeof callback === 'function') ? callback : this.oncreate;
@@ -44,7 +42,17 @@ var SocketServer = /** @class */ (function () {
         this.onerror = (callback && typeof callback === 'function') ? callback : this.onerror;
         return this;
     };
-    SocketServer.prototype.address = function () { };
+    SocketServer.prototype.address = function () {
+        if (this.$$server) {
+            return this.$$server.address();
+        }
+        else {
+            return { address: "", family: "", port: undefined };
+        }
+    };
+    SocketServer.prototype.close = function (callback) {
+        this.$$server.close(callback);
+    };
     SocketServer.prototype.getNativeServer = function () {
         return this.$$server || undefined;
     };

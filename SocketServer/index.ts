@@ -1,5 +1,3 @@
-/// <reference types="ws" />
-
 import * as WebSocket from 'ws';
 import * as colors          from 'colors';
 import * as http            from 'http';
@@ -7,7 +5,7 @@ import * as http            from 'http';
 import { SocketServerOptions } from './index.interface';
 
 interface Address {
-    port: number,
+    port: number | undefined,
     family: any,
     address: string
 }
@@ -34,14 +32,13 @@ export class SocketServer {
             opt = Object.assign(opt, options);
         }
 
-        server = new WebSocket.Server(opt, this.oncreate);
-        server.on('connection', this.onconnection);
-        server.on('listening', this.onlistening);
-        server.on('headers', this.onheaders);
-        server.on('error', this.onerror);
+        this.$$server = new WebSocket.Server(opt, this.oncreate);
+        this.$$server.on('connection', this.onconnection);
+        this.$$server.on('listening', this.onlistening);
+        this.$$server.on('headers', this.onheaders);
+        this.$$server.on('error', this.onerror);
 
-        this.$$server = server;
-        this.clients = server.clients;
+        this.clients = this.$$server.clients;
     }
 
     setOnCreateCallback(callback?: () => void) {
@@ -69,7 +66,17 @@ export class SocketServer {
         return this;
     }
 
-    address(): any {}
+    address(): Address {
+        if(this.$$server) {
+            return this.$$server.address();
+        } else {
+            return { address: "", family: "", port: undefined };
+        }
+    }
+
+    close(callback?: () => void): any{
+        this.$$server.close(callback);
+    }
 
     getNativeServer(): any {
         return this.$$server || undefined;

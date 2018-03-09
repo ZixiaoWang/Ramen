@@ -6,6 +6,7 @@ import * as colors from 'colors';
 
 import { REPL } from './REPL';
 import { SocketServer } from './SocketServer';
+import { tablifyServers } from './Utils/tablify';
 
 var PORT: number = 5000;
 var SERVER_COUNT = 1;
@@ -17,19 +18,33 @@ function setRelpServer(){
     replServer
         .setVariable('SocketServer', SocketServer)
         .setVariable('WebSocket', WebSocket)
-        .setCommand('create', (serverName?: string) => {
-            let name = serverName ? serverName.split(' ')[0] : undefined;
-            replServer.displayPrompt();
-            setSocketServer(replServer, name);
-        }, `\n\t[SOCKET] Quickly set up a server with default port ${ PORT }\n\te.g. .create [name]`)
-        .console('>>> ');
+        .setVariable('REPL', replServer)
+        .setCommand(
+            'create', 
+            (serverName?: string) => {
+                let name = serverName ? serverName.split(' ')[0] : undefined;
+                replServer.displayPrompt();
+                setSocketServer(replServer, name);
+            }, 
+            `\n\t[SOCKET] Quickly set up a server with default port ${ PORT }\n\te.g. ${ colors.green('.create [name]') }`
+        )
+        .setCommand(
+            'list',
+            () => {
+                listAllServers();
+                replServer.displayPrompt();
+            },
+            `\n\t[SOCKET] List all the Servers.\n\te.g. ${ colors.green('.list') }`
+        )
+        .console( colors.green('Ramen> ') );
 }
 
 function setSocketServer(replServer: REPL, name?: string){
-    let socketServer = new SocketServer()
+    let socketServer = new SocketServer();
+    let serverName = name || 'server' + (SERVER_COUNT++);
+
     socketServer
         .setOnCreateCallback(() => {
-            let serverName = name || 'server' + (SERVER_COUNT++);
             serverMap.set(serverName, socketServer);
 
             replServer.log(`Server ${ colors.green(serverName) } is listening to port ${ colors.green(PORT.toString()) }`);
@@ -44,9 +59,13 @@ function setSocketServer(replServer: REPL, name?: string){
             let remoteAddress = request.connection.remoteAddress || 'undefined';
 
             connectionsOfCurrentServer.push(websocket);
-            replServer.log(`New Connection with ${ colors.green(remoteAddress) } has been establshed.`);
+            replServer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
         })
         .createServer(PORT);
+}
+
+function listAllServers() {
+    tablifyServers(serverMap, connectionsMap);
 }
 
 program
