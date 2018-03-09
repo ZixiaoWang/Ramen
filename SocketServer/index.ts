@@ -2,13 +2,7 @@ import * as WebSocket from 'ws';
 import * as colors          from 'colors';
 import * as http            from 'http';
 
-import { SocketServerOptions } from './index.interface';
-
-interface Address {
-    port: number | undefined,
-    family: any,
-    address: string
-}
+import { SocketServerOptions, Address } from './index.interface';
 
 export class SocketServer {
 

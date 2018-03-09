@@ -74,3 +74,9 @@ export interface SocketServerOptions {
      */
     maxPayload?: number
 }
+
+export interface Address {
+    port: number | undefined,
+    family: any,
+    address: string
+}

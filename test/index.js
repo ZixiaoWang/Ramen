@@ -20,21 +20,22 @@ function setRelpServer() {
         .setCommand('create', function (serverName) {
         var name = serverName ? serverName.split(' ')[0] : undefined;
         replServer.displayPrompt();
-        setSocketServer(replServer, name);
+        setSocketServer(name, replServer);
     }, "\n\t[SOCKET] Quickly set up a server with default port " + PORT + "\n\te.g. " + colors.green('.create [name]'))
         .setCommand('list', function () {
         listAllServers();
         replServer.displayPrompt();
-    }, "\n\t[SOCKET] List all the connections.\n\te.g. " + colors.green('.list'))
+    }, "\n\t[SOCKET] List all the Servers.\n\te.g. " + colors.green('.list'))
         .console(colors.green('Ramen> '));
 }
-function setSocketServer(replServer, name) {
+function setSocketServer(name, replServer) {
     var socketServer = new SocketServer_1.SocketServer();
     var serverName = name || 'server' + (SERVER_COUNT++);
+    var outputer = replServer || console;
     socketServer
         .setOnCreateCallback(function () {
         serverMap.set(serverName, socketServer);
-        replServer.log("Server " + colors.green(serverName) + " is listening to port " + colors.green(PORT.toString()));
+        outputer.log("Server " + colors.green(serverName) + " is listening to port " + colors.green(PORT.toString()));
         PORT++;
     })
         .setOnConnectionCallback(function (websocket, request) {
@@ -44,7 +45,7 @@ function setSocketServer(replServer, name) {
         var connectionsOfCurrentServer = connectionsMap.get(socketServer);
         var remoteAddress = request.connection.remoteAddress || 'undefined';
         connectionsOfCurrentServer.push(websocket);
-        replServer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
+        outputer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
     })
         .createServer(PORT);
 }
@@ -54,7 +55,18 @@ function listAllServers() {
 program
     .command('console')
     .description('Open up a console with embeded SocketServer')
-    .alias('c')
     .action(setRelpServer);
+program
+    .command('list')
+    .description('List all the established Servers')
+    .action(function () {
+    tablify_1.tablifyServers(serverMap, connectionsMap);
+});
+program
+    .command('create [name]')
+    .description("[SOCKET] Quickly set up a server with default port " + PORT + ". Example: " + colors.green('ramen create [name]'))
+    .action(function (serverName) {
+    setSocketServer(serverName, console);
+});
 program
     .parse(process.argv);
