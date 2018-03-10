@@ -1,48 +1,16 @@
 #!/usr/bin/env node
 
+/// <reference path="index.d.ts" />
+
 import * as program from 'commander';
 import * as WebSocket from 'ws';
 import * as colors from 'colors';
+import { crc32 } from 'js-crc';
 
 import { REPL } from './REPL';
 import { SocketServer } from './SocketServer';
-import { tablifyServers } from './Utils/tablify';
-
-var PORT: number = 5000;
-var SERVER_COUNT = 1;
-var focusedConnection: WebSocket;
-const serverMap: Map<string, SocketServer> = new Map();
-const connectionsMap: Map<SocketServer, Array<WebSocket>> = new Map();
-
-function setSocketServer(name?: string, replServer?: REPL | any){
-    let socketServer = new SocketServer();
-    let serverName = name || 'server' + (SERVER_COUNT++);
-    let outputer = replServer || console;
-
-    socketServer
-        .setOnCreateCallback(() => {
-            serverMap.set(serverName, socketServer);
-
-            outputer.log(`Server ${ colors.green(serverName) } is listening to port ${ colors.green(PORT.toString()) }`);
-            PORT++;
-        })
-        .setOnConnectionCallback((websocket, request) => {
-            if(connectionsMap.get(socketServer) === undefined) {
-                connectionsMap.set(socketServer, []);
-            }
-
-            let connectionsOfCurrentServer = connectionsMap.get(socketServer) as Array<WebSocket>;
-            let remoteAddress = request.connection.remoteAddress || 'undefined';
-
-            connectionsOfCurrentServer.push(websocket);
-            outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
-        })
-        .createServer(PORT);
-}
-
-function listAllServers() {
-    tablifyServers(serverMap, connectionsMap);
-}
+import { tablifyServers, tablifyConnections } from './Utils/tablify';
+import { Ramen } from './Ramen';
 
 
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,26 +41,40 @@ function listAllServers() {
 
 function setRelpServer(){
     let replServer = new REPL();
+    let ramen = new Ramen();
+
     replServer
         .setVariable('SocketServer', SocketServer)
         .setVariable('WebSocket', WebSocket)
         .setVariable('REPL', replServer)
+        .setVariable('RAMEN', ramen)
         .setCommand(
             'create', 
             (serverName?: string) => {
                 let name = serverName ? serverName.split(' ')[0] : undefined;
                 replServer.displayPrompt();
-                setSocketServer(name, replServer);
+                ramen.setSocketServer(name, replServer);
             }, 
-            `\n\t[SOCKET] Quickly set up a server with default port ${ PORT }\n\te.g. ${ colors.green('.create [name]') }`
+            `\n\t[SOCKET] Quickly set up a server with default port 500\n\te.g. ${ colors.green('.create [name]') }`
         )
         .setCommand(
             'list',
-            () => {
-                listAllServers();
-                replServer.displayPrompt();
+            (type: string) => {
+                if( /^servers|s$/i.test(type.trim()) ) {
+                    ramen.listAllServers();
+                    replServer.displayPrompt();
+                }else if( /^connections|clients|c$/i.test(type.trim()) ) {
+                    ramen.listAllConnections();
+                    replServer.displayPrompt();
+                }else {
+                    console.log(`\tPlease specify a list type`);
+                    console.log(`\t ${colors.green('servers     or s') }\tList all existing servers`)
+                    console.log(`\t ${colors.green('connections or c') }\tList all established connections`)
+                    console.log(`\t ${colors.green('clients     or c') }\tThe same with ${ colors.green('.list connections') }`)
+                    replServer.displayPrompt();
+                }
             },
-            `\n\t[SOCKET] List all the Servers.\n\te.g. ${ colors.green('.list') }`
+            `\n\t[SOCKET] List all the Servers.\n\te.g. ${ colors.green('.list servers') } or ${ colors.green('.list connections') }`
         )
         .console( colors.green('Ramen> ') );
 }
@@ -106,14 +88,16 @@ program
     .command('list')
     .description('List all the established Servers')
     .action(() => {
-        tablifyServers(serverMap, connectionsMap);
+        let ramen = new Ramen();
+        tablifyServers(ramen.serverMap, ramen.connectionsMap);
     });
 
 program
     .command('create [name]')
-    .description(`[SOCKET] Quickly set up a server with default port ${ PORT }. Example: ${ colors.green('ramen create [name]') }`)
+    .description(`[SOCKET] Quickly set up a server with default port 5000. Example: ${ colors.green('ramen create [name]') }`)
     .action((serverName) => {
-        setSocketServer(serverName, console);
+        let ramen = new Ramen();
+        ramen.setSocketServer(serverName, console);
     })
 
 program

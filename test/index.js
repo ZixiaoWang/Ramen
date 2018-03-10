@@ -7,50 +7,63 @@ var colors = require("colors");
 var REPL_1 = require("./REPL");
 var SocketServer_1 = require("./SocketServer");
 var tablify_1 = require("./Utils/tablify");
-var PORT = 5000;
-var SERVER_COUNT = 1;
-var serverMap = new Map();
-var connectionsMap = new Map();
+var Ramen_1 = require("./Ramen");
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                       _oo0oo_
+//                      o8888888o
+//                      88" . "88
+//                      (| -_- |)
+//                      0\  =  /0
+//                    ___/`---'\___
+//                  .' \\|     |// '.
+//                 / \\|||  :  |||// \
+//                / _||||| -:- |||||- \
+//               |   | \\\  -  /// |   |
+//               | \_|  ''\---/''  |_/ |
+//               \  .-\__  '-'  ___/-. /
+//             ___'. .'  /--.--\  `. .'___
+//          ."" '<  `.___\_<|>_/___.' >' "".
+//         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//         \  \ `_.   \_ __\ /__ _/   .-` /  /
+//     =====`-.____`.___ \_____/___.-`___.-'=====
+//                       `=---='
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//               佛祖保佑         永无BUG
+//
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function setRelpServer() {
     var replServer = new REPL_1.REPL();
+    var ramen = new Ramen_1.Ramen();
     replServer
         .setVariable('SocketServer', SocketServer_1.SocketServer)
         .setVariable('WebSocket', WebSocket)
         .setVariable('REPL', replServer)
+        .setVariable('RAMEN', ramen)
         .setCommand('create', function (serverName) {
         var name = serverName ? serverName.split(' ')[0] : undefined;
         replServer.displayPrompt();
-        setSocketServer(name, replServer);
-    }, "\n\t[SOCKET] Quickly set up a server with default port " + PORT + "\n\te.g. " + colors.green('.create [name]'))
-        .setCommand('list', function () {
-        listAllServers();
-        replServer.displayPrompt();
-    }, "\n\t[SOCKET] List all the Servers.\n\te.g. " + colors.green('.list'))
-        .console(colors.green('Ramen> '));
-}
-function setSocketServer(name, replServer) {
-    var socketServer = new SocketServer_1.SocketServer();
-    var serverName = name || 'server' + (SERVER_COUNT++);
-    var outputer = replServer || console;
-    socketServer
-        .setOnCreateCallback(function () {
-        serverMap.set(serverName, socketServer);
-        outputer.log("Server " + colors.green(serverName) + " is listening to port " + colors.green(PORT.toString()));
-        PORT++;
-    })
-        .setOnConnectionCallback(function (websocket, request) {
-        if (connectionsMap.get(socketServer) === undefined) {
-            connectionsMap.set(socketServer, []);
+        ramen.setSocketServer(name, replServer);
+    }, "\n\t[SOCKET] Quickly set up a server with default port 500\n\te.g. " + colors.green('.create [name]'))
+        .setCommand('list', function (type) {
+        if (/^servers|s$/i.test(type.trim())) {
+            ramen.listAllServers();
+            replServer.displayPrompt();
         }
-        var connectionsOfCurrentServer = connectionsMap.get(socketServer);
-        var remoteAddress = request.connection.remoteAddress || 'undefined';
-        connectionsOfCurrentServer.push(websocket);
-        outputer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
-    })
-        .createServer(PORT);
-}
-function listAllServers() {
-    tablify_1.tablifyServers(serverMap, connectionsMap);
+        else if (/^connections|clients|c$/i.test(type.trim())) {
+            ramen.listAllConnections();
+            replServer.displayPrompt();
+        }
+        else {
+            console.log("\tPlease specify a list type");
+            console.log("\t " + colors.green('servers     or s') + "\tList all existing servers");
+            console.log("\t " + colors.green('connections or c') + "\tList all established connections");
+            console.log("\t " + colors.green('clients     or c') + "\tThe same with " + colors.green('.list connections'));
+            replServer.displayPrompt();
+        }
+    }, "\n\t[SOCKET] List all the Servers.\n\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections'))
+        .console(colors.green('Ramen> '));
 }
 program
     .command('console')
@@ -60,13 +73,15 @@ program
     .command('list')
     .description('List all the established Servers')
     .action(function () {
-    tablify_1.tablifyServers(serverMap, connectionsMap);
+    var ramen = new Ramen_1.Ramen();
+    tablify_1.tablifyServers(ramen.serverMap, ramen.connectionsMap);
 });
 program
     .command('create [name]')
-    .description("[SOCKET] Quickly set up a server with default port " + PORT + ". Example: " + colors.green('ramen create [name]'))
+    .description("[SOCKET] Quickly set up a server with default port 5000. Example: " + colors.green('ramen create [name]'))
     .action(function (serverName) {
-    setSocketServer(serverName, console);
+    var ramen = new Ramen_1.Ramen();
+    ramen.setSocketServer(serverName, console);
 });
 program
     .parse(process.argv);
