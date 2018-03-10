@@ -11,18 +11,25 @@ export class Ramen {
 
     private PORT: number = 5000;
     private SERVER_COUNT = 1;
+    private outputer: any = console;
+
+    public focusedServer: Array<SocketServer> = [];
     public focusedConnections: Array<WebSocket> = [];
     public serverMap: Map<string, SocketServer> = new Map();
     public connectionsMap: Map<SocketServer, Map<string, WebSocket>> = new Map();
 
     constructor() {}
 
-    setSocketServer(name?: string, replServer?: REPL | any){
+    setOutputer(outputer: REPL | any): Ramen{
+        this.outputer = outputer;
+        return this;
+    }
+
+    setSocketServer(name?: string){
         let serverName = name || 'server' + (this.SERVER_COUNT++);
-        let outputer = replServer || console;
 
         if(this.serverMap.has(serverName) === true) {
-            outputer.console(`[${ colors.red('ERROR') }] ${ serverName } has already existed!`);
+            this.outputer.console(`[${ colors.red('ERROR') }] ${ serverName } has already existed!`);
             return ;    
         }
 
@@ -32,7 +39,7 @@ export class Ramen {
             .setOnCreateCallback(() => {
                 this.serverMap.set(serverName, socketServer);
 
-                outputer.log(`Server ${ colors.green(serverName) } is listening to port ${ colors.green(this.PORT.toString()) }`);
+                this.outputer.log(`Server ${ colors.green(serverName) } is listening to port ${ colors.green(this.PORT.toString()) }`);
                 this.PORT++;
             })
             .setOnConnectionCallback((websocket, request) => {
@@ -46,7 +53,7 @@ export class Ramen {
 
                 websocket.url = remoteAddress;
                 connection.set(hexString, websocket);
-                outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
+                this.outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
             })
             .createServer(this.PORT);
     }
@@ -57,5 +64,43 @@ export class Ramen {
 
     listAllConnections() {
         tablifyConnections(this.connectionsMap);
+    }
+
+    getServerByName(name: string): undefined | SocketServer{
+
+        if(name === undefined) {
+            this.outputer.console(`[${ colors.red('ERROR') }] Please enter a name`);
+            return undefined;
+        }
+
+        if(this.serverMap.has(name) === false) {
+            this.outputer.console(`[${ colors.yellow('WARN') }] Cannot find server ${ name }`);
+            return undefined;
+        }
+
+        return this.serverMap.get(name);
+        
+    }
+
+    getConnectionByHex(hex: string): undefined | WebSocket {
+        
+        if(/[0-9a-f]{8}/i.test(hex) !== true){
+            this.outputer.console(`[${ colors.red('ERROR') }] Please enter a valid Hex String. e.g. 234d4ac3`);
+            return undefined;
+        }
+
+        let connectionInterator = this.connectionsMap.values();
+
+        for(let i=0; i<this.connectionsMap.size;) {
+            let hexMap = connectionInterator.next().value;
+            if(hexMap.has(hex) === true) {
+                return hexMap.get(hex);;
+            }else{
+                continue;
+            }
+        }
+
+        this.outputer.console(`Cannot find connection ${ hex }`);
+        return undefined;
     }
 }
