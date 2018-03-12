@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var repl = require("repl");
+var colors = require("colors");
 var REPL = /** @class */ (function () {
     function REPL() {
         this.replOptions = {};
@@ -118,6 +119,10 @@ var REPL = /** @class */ (function () {
         var tempDescriptor = Object.assign({ value: tempValue }, descriptor ? descriptor : null);
         this.variablesList.set(key, tempDescriptor);
         return this;
+    };
+    REPL.prototype.getNativeServer = function () {
+        this.log(colors.yellow('WARN') + " You havn't create a server yet, please use " + colors.cyan('createServer()') + " function.");
+        return this.replServer;
     };
     REPL.prototype.log = function () {
         var args = [];

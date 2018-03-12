@@ -104,4 +104,34 @@ export class Ramen {
         this.outputer.console(`Cannot find connection ${ hex }`);
         return undefined;
     }
+
+    broadcast(data: any): void{
+        let countNumber = 0;
+
+        this.serverMap.forEach((server, name) => {
+            server.broadcast(data, (totalNumber) => {
+                countNumber += totalNumber;
+            });
+        });
+
+        this.outputer.log(`Message has been sent to ${countNumber} clients`);
+    }
+
+    closeAll(): void{
+        this.serverMap.forEach((server, key) => {
+            server.close();
+        });
+    }
+
+    reset(): void{
+        this.closeAll();
+        
+        this.PORT = 5000;
+        this.SERVER_COUNT = 1;
+
+        this.focusedServer = [];
+        this.focusedConnections = [];
+        this.serverMap = new Map();
+        this.connectionsMap = new Map();
+    }
 }

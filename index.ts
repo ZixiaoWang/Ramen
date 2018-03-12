@@ -54,9 +54,8 @@ import { Ramen } from './Ramen';
             'create', 
             (serverName?: string) => {
                 let name = serverName ? serverName.split(' ')[0] : undefined;
+                ramen.createSocketServer(name);
                 replServer.displayPrompt();
-                ramen
-                    .createSocketServer(name);
             }, 
             `\n\t[SOCKET] Quickly set up a server with default port 500\n\te.g. ${ colors.green('.create [name]') }`
         )
@@ -80,9 +79,51 @@ import { Ramen } from './Ramen';
             `\n\t[SOCKET] List all the Servers.\n\te.g. ${ colors.green('.list servers') } or ${ colors.green('.list connections') }`
         )
         .setCommand(
-            'focus',
-            () => {},
-            '\n\t[SOCKET] Focus on one '
+            'broadcast',
+            (args: string) => {
+                ramen.broadcast(args);
+            },
+            `\n\t[SOCKET] Broadcast the arguments (string) to all connected clients. \n\te.g. ${ colors.green('.broadcast Hello World') }`
+        )
+        .setCommand(
+            'shutdown',
+            (arg: string) => {
+                let argArr: Array<string>
+                let argSet: Set<string>;
+
+                if(arg === undefined || arg.length === 0){
+                    replServer.log(`Please enter a server name, or enter '${ colors.green('--all') }' to shutdown all the servers`);
+                    return null;
+                } else {
+                    argArr = arg.split(' ');
+                    argSet = new Set(argArr);
+                    if(argSet.has('--all') === true) {
+                        ramen.serverMap.forEach((server, name) => {
+                            server.close();
+                            ramen.serverMap.delete(name);
+                            ramen.connectionsMap.delete(server);
+                            console.log(`${ colors.green(name) } has closed.`);
+                        });
+                        ramen.reset();
+                        replServer.displayPrompt();
+                    }else{
+                        argArr.forEach(serverName => {
+                            if(ramen.serverMap.has(serverName)){
+                                let server = ramen.serverMap.get(serverName) as SocketServer;
+                                server.close();
+                                ramen.serverMap.delete(serverName);
+                                ramen.connectionsMap.delete(server);
+                                console.log(`${ colors.green(serverName) } has closed.`);
+                            }else{
+                                console.log(`[${ colors.yellow('WARN') }] Cannot find server '${ colors.yellow(serverName) }'`);
+                            }
+                        });
+                        replServer.displayPrompt();
+                    }
+                }
+                
+            },
+            `\n\t[SOCKET] Shut down one or more specific server. \n\te.g. ${ colors.green('.shutdown [...serverName]') }`
         )
 
         .console( colors.green('Ramen> ') );

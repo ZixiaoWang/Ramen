@@ -68,6 +68,20 @@ export class SocketServer {
         }
     }
 
+    broadcast(data: any, callback: (totalNumber: number) => void) {
+        let totalCount = 0;
+
+        this.clients.forEach((client: WebSocket) => {
+            if(client.readyState === WebSocket.OPEN){
+                client.send(data);
+                totalCount++;
+            }
+        });
+        if(callback && typeof callback === 'function') {
+            callback(totalCount);
+        }
+    }
+
     close(callback?: () => void): any{
         this.$$server.close(callback);
     }

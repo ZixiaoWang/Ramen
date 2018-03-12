@@ -82,6 +82,29 @@ var Ramen = /** @class */ (function () {
         this.outputer.console("Cannot find connection " + hex);
         return undefined;
     };
+    Ramen.prototype.broadcast = function (data) {
+        var countNumber = 0;
+        this.serverMap.forEach(function (server, name) {
+            server.broadcast(data, function (totalNumber) {
+                countNumber += totalNumber;
+            });
+        });
+        this.outputer.log("Message has been sent to " + countNumber + " clients");
+    };
+    Ramen.prototype.closeAll = function () {
+        this.serverMap.forEach(function (server, key) {
+            server.close();
+        });
+    };
+    Ramen.prototype.reset = function () {
+        this.closeAll();
+        this.PORT = 5000;
+        this.SERVER_COUNT = 1;
+        this.focusedServer = [];
+        this.focusedConnections = [];
+        this.serverMap = new Map();
+        this.connectionsMap = new Map();
+    };
     return Ramen;
 }());
 exports.Ramen = Ramen;

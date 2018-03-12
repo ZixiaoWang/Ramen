@@ -31,7 +31,7 @@ var Ramen_1 = require("./Ramen");
 //               佛祖保佑         永无BUG
 //
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function setRelpServer() {
+(function setRelpServer() {
     var replServer = new REPL_1.REPL();
     var ramen = new Ramen_1.Ramen().setOutputer(replServer);
     replServer
@@ -41,9 +41,8 @@ function setRelpServer() {
         .setVariable('Ramen', ramen)
         .setCommand('create', function (serverName) {
         var name = serverName ? serverName.split(' ')[0] : undefined;
+        ramen.createSocketServer(name);
         replServer.displayPrompt();
-        ramen
-            .createSocketServer(name);
     }, "\n\t[SOCKET] Quickly set up a server with default port 500\n\te.g. " + colors.green('.create [name]'))
         .setCommand('list', function (type) {
         if (/^(servers|s)/i.test(type.trim())) {
@@ -62,9 +61,48 @@ function setRelpServer() {
             replServer.displayPrompt();
         }
     }, "\n\t[SOCKET] List all the Servers.\n\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections'))
+        .setCommand('broadcast', function (args) {
+        ramen.broadcast(args);
+    }, "\n\t[SOCKET] Broadcast the arguments (string) to all connected clients. \n\te.g. " + colors.green('.broadcast Hello World'))
+        .setCommand('shutdown', function (arg) {
+        var argArr;
+        var argSet;
+        if (arg === undefined || arg.length === 0) {
+            replServer.log("Please enter a server name, or enter '" + colors.green('--all') + "' to shutdown all the servers");
+            return null;
+        }
+        else {
+            argArr = arg.split(' ');
+            argSet = new Set(argArr);
+            if (argSet.has('--all') === true) {
+                ramen.serverMap.forEach(function (server, name) {
+                    server.close();
+                    ramen.serverMap.delete(name);
+                    ramen.connectionsMap.delete(server);
+                    console.log(colors.green(name) + " has closed.");
+                });
+                ramen.reset();
+                replServer.displayPrompt();
+            }
+            else {
+                argArr.forEach(function (serverName) {
+                    if (ramen.serverMap.has(serverName)) {
+                        var server = ramen.serverMap.get(serverName);
+                        server.close();
+                        ramen.serverMap.delete(serverName);
+                        ramen.connectionsMap.delete(server);
+                        console.log(colors.green(serverName) + " has closed.");
+                    }
+                    else {
+                        console.log("[" + colors.yellow('WARN') + "] Cannot find server '" + colors.yellow(serverName) + "'");
+                    }
+                });
+                replServer.displayPrompt();
+            }
+        }
+    }, "\n\t[SOCKET] Shut down one or more specific server. \n\te.g. " + colors.green('.shutdown [...serverName]'))
         .console(colors.green('Ramen> '));
-}
-setRelpServer();
+})();
 // program
 //     .command('')
 //     .description('Open up a console with embeded SocketServer')

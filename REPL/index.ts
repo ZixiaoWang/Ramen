@@ -145,6 +145,11 @@ export class REPL {
         return this;
     }
 
+    getNativeServer(): REPLServer {
+        this.log(`${ colors.yellow('WARN') } You havn't create a server yet, please use ${ colors.cyan('createServer()') } function.`);
+        return this.replServer;
+    }
+
     log(...args: Array<any>){
         console.log(...args);
         this.displayPrompt();

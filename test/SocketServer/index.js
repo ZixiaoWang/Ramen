@@ -50,6 +50,18 @@ var SocketServer = /** @class */ (function () {
             return { address: "", family: "", port: undefined };
         }
     };
+    SocketServer.prototype.broadcast = function (data, callback) {
+        var totalCount = 0;
+        this.clients.forEach(function (client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(data);
+                totalCount++;
+            }
+        });
+        if (callback && typeof callback === 'function') {
+            callback(totalCount);
+        }
+    };
     SocketServer.prototype.close = function (callback) {
         this.$$server.close(callback);
     };
