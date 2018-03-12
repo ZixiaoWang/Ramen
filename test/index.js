@@ -38,12 +38,12 @@ function setRelpServer() {
         .setVariable('SocketServer', SocketServer_1.SocketServer)
         .setVariable('WebSocket', WebSocket)
         .setVariable('REPL', replServer)
-        .setVariable('RAMEN', ramen)
+        .setVariable('Ramen', ramen)
         .setCommand('create', function (serverName) {
         var name = serverName ? serverName.split(' ')[0] : undefined;
         replServer.displayPrompt();
         ramen
-            .setSocketServer(name);
+            .createSocketServer(name);
     }, "\n\t[SOCKET] Quickly set up a server with default port 500\n\te.g. " + colors.green('.create [name]'))
         .setCommand('list', function (type) {
         if (/^(servers|s)/i.test(type.trim())) {
@@ -58,7 +58,7 @@ function setRelpServer() {
             console.log("\tPlease specify a list type");
             console.log("\t " + colors.green('servers     or s') + "\tList all existing servers");
             console.log("\t " + colors.green('connections or c') + "\tList all established connections");
-            console.log("\t " + colors.green('clients     or c') + "\tThe same with " + colors.green('.list connections'));
+            console.log("\t " + colors.green('clients         ') + "\tAlias of " + colors.green('.list connections'));
             replServer.displayPrompt();
         }
     }, "\n\t[SOCKET] List all the Servers.\n\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections'))

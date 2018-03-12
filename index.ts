@@ -9,7 +9,7 @@ import { crc32 } from 'js-crc';
 
 import { REPL } from './REPL';
 import { SocketServer } from './SocketServer';
-import { tablifyServers, tablifyConnections } from './Utils/tablify';
+import { tablifyServers, tablifyConnections } from './Utils/Tablify';
 import { Ramen } from './Ramen';
 
 
@@ -39,15 +39,16 @@ import { Ramen } from './Ramen';
 //
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-function setRelpServer(){
+(function setRelpServer(){
     let replServer = new REPL();
     let ramen = new Ramen().setOutputer(replServer);
 
     replServer
+
         .setVariable('SocketServer', SocketServer)
         .setVariable('WebSocket', WebSocket)
         .setVariable('REPL', replServer)
-        .setVariable('RAMEN', ramen)
+        .setVariable('Ramen', ramen)
 
         .setCommand(
             'create', 
@@ -55,7 +56,7 @@ function setRelpServer(){
                 let name = serverName ? serverName.split(' ')[0] : undefined;
                 replServer.displayPrompt();
                 ramen
-                    .setSocketServer(name);
+                    .createSocketServer(name);
             }, 
             `\n\t[SOCKET] Quickly set up a server with default port 500\n\te.g. ${ colors.green('.create [name]') }`
         )
@@ -72,17 +73,21 @@ function setRelpServer(){
                     console.log(`\tPlease specify a list type`);
                     console.log(`\t ${colors.green('servers     or s') }\tList all existing servers`)
                     console.log(`\t ${colors.green('connections or c') }\tList all established connections`)
-                    console.log(`\t ${colors.green('clients     or c') }\tThe same with ${ colors.green('.list connections') }`)
+                    console.log(`\t ${colors.green('clients         ') }\tAlias of ${ colors.green('.list connections') }`)
                     replServer.displayPrompt();
                 }
             },
             `\n\t[SOCKET] List all the Servers.\n\te.g. ${ colors.green('.list servers') } or ${ colors.green('.list connections') }`
         )
+        .setCommand(
+            'focus',
+            () => {},
+            '\n\t[SOCKET] Focus on one '
+        )
 
         .console( colors.green('Ramen> ') );
-}
+})();
 
-setRelpServer();
 
 // program
 //     .command('')

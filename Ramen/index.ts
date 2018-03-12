@@ -25,7 +25,7 @@ export class Ramen {
         return this;
     }
 
-    setSocketServer(name?: string){
+    createSocketServer(name?: string){
         let serverName = name || 'server' + (this.SERVER_COUNT++);
 
         if(this.serverMap.has(serverName) === true) {
@@ -51,6 +51,7 @@ export class Ramen {
                 let remoteAddress = request.connection.remoteAddress || 'undefined';
                 let hexString = crc32( (Date.now() + Math.random()).toString() );
 
+                Object.defineProperty(websocket, 'hex', { value: hexString, writable: false, enumerable: false });
                 websocket.url = remoteAddress;
                 connection.set(hexString, websocket);
                 this.outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);

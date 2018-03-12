@@ -18,7 +18,7 @@ var Ramen = /** @class */ (function () {
         this.outputer = outputer;
         return this;
     };
-    Ramen.prototype.setSocketServer = function (name) {
+    Ramen.prototype.createSocketServer = function (name) {
         var _this = this;
         var serverName = name || 'server' + (this.SERVER_COUNT++);
         if (this.serverMap.has(serverName) === true) {
@@ -39,6 +39,7 @@ var Ramen = /** @class */ (function () {
             var connection = _this.connectionsMap.get(socketServer) || new Map();
             var remoteAddress = request.connection.remoteAddress || 'undefined';
             var hexString = js_crc_1.crc32((Date.now() + Math.random()).toString());
+            Object.defineProperty(websocket, 'hex', { value: hexString, writable: false, enumerable: false });
             websocket.url = remoteAddress;
             connection.set(hexString, websocket);
             _this.outputer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
