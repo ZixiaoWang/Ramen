@@ -92,7 +92,7 @@ export class Ramen {
 
         let connectionInterator = this.connectionsMap.values();
 
-        for(let i=0; i<this.connectionsMap.size;) {
+        for(let i=0; i<this.connectionsMap.size; i++) {
             let hexMap = connectionInterator.next().value;
             if(hexMap.has(hex) === true) {
                 return hexMap.get(hex);;
@@ -125,7 +125,7 @@ export class Ramen {
 
     reset(): void{
         this.closeAll();
-        
+
         this.PORT = 5000;
         this.SERVER_COUNT = 1;
 

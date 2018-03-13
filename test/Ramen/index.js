@@ -69,7 +69,7 @@ var Ramen = /** @class */ (function () {
             return undefined;
         }
         var connectionInterator = this.connectionsMap.values();
-        for (var i = 0; i < this.connectionsMap.size;) {
+        for (var i = 0; i < this.connectionsMap.size; i++) {
             var hexMap = connectionInterator.next().value;
             if (hexMap.has(hex) === true) {
                 return hexMap.get(hex);

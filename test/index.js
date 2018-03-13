@@ -64,6 +64,60 @@ var Ramen_1 = require("./Ramen");
         .setCommand('broadcast', function (args) {
         ramen.broadcast(args);
     }, "\n\t[SOCKET] Broadcast the arguments (string) to all connected clients. \n\te.g. " + colors.green('.broadcast Hello World'))
+        .setCommand('close', function (args) {
+        var type = args.split(' ')[0];
+        var nameArr = args.split(' ').splice(1);
+        if (/server|connection|client/.test(type) === false) {
+            console.log('Please enter a valid type. (a type is one of "server", "connection" and "client"');
+            replServer.displayPrompt();
+            return null;
+        }
+        else {
+            if (nameArr.length === 0) {
+                console.log('Please enter a valid name. (a name could be the server name, or the hex string of connections');
+                replServer.displayPrompt();
+                return null;
+            }
+            else if (/server/.test(type) === true) {
+                nameArr.forEach(function (name) {
+                    if (ramen.serverMap.has(name) === true) {
+                        var server = ramen.serverMap.get(name);
+                        server.close();
+                        ramen.serverMap.delete(name);
+                        ramen.connectionsMap.delete(server);
+                        console.log("$" + name + " has closed");
+                    }
+                    else {
+                        console.log("Cannot find Server " + colors.yellow(name));
+                    }
+                });
+                replServer.displayPrompt();
+            }
+            else if (/connection|client/.test(type) === true) {
+                nameArr.forEach(function (name) {
+                    if (ramen.getConnectionByHex(name) !== undefined) {
+                        var websocket = ramen.getConnectionByHex(name);
+                        websocket.close();
+                        try {
+                            ramen.connectionsMap.forEach(function (socketMap, socketServer) {
+                                if (socketMap.has(name)) {
+                                    socketMap.delete(name);
+                                    console.log(name + " has closed");
+                                    throw new Error();
+                                }
+                            });
+                        }
+                        catch (err) {
+                            // do absolutely nothing here
+                        }
+                    }
+                    else {
+                        console.log("Cannot find Connection " + colors.yellow(name));
+                    }
+                });
+            }
+        }
+    }, "\n\t[SOCKET] Close the server or a specific connection. \n\t e.g. " + colors.green('.close <type> <name>') + " \n\t --type \t one of \"server\", \"connection\" and \"client\" \n\t --name \t The server name, or connection hex string.")
         .setCommand('shutdown', function (arg) {
         var argArr;
         var argSet;
