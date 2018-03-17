@@ -36,14 +36,6 @@ var REPL = /** @class */ (function () {
         this.replOptions = options || this.replOptions;
         return this;
     };
-    REPL.prototype.setPrompt = function (prompt) {
-        var tempPrompt = prompt;
-        if (typeof prompt !== 'string') {
-            tempPrompt = tempPrompt.toString();
-        }
-        this.replOptions.prompt = tempPrompt || '> ';
-        return this;
-    };
     REPL.prototype.setInput = function (input) {
         if (input) {
             this.replOptions.input = input;
@@ -106,6 +98,19 @@ var REPL = /** @class */ (function () {
         this.replOptions.breakEvalOnSigint = breakEvalOnSigint;
         return this;
     };
+    REPL.prototype.setPrompt = function (prompt) {
+        var tempPrompt = prompt || this.replOptions.prompt || '> ';
+        if (typeof prompt !== 'string') {
+            tempPrompt = tempPrompt.toString();
+        }
+        if (this.replServer) {
+            this.replServer.setPrompt(colors.green(tempPrompt));
+        }
+        else {
+            this.replOptions.prompt = tempPrompt || '> ';
+        }
+        return this;
+    };
     REPL.prototype.setCommand = function (cmd, action, description) {
         this.commandList.push({
             cmd: cmd,
@@ -121,7 +126,10 @@ var REPL = /** @class */ (function () {
         return this;
     };
     REPL.prototype.getNativeServer = function () {
-        this.log(colors.yellow('WARN') + " You havn't create a server yet, please use " + colors.cyan('createServer()') + " function.");
+        if (this.replServer === undefined) {
+            this.log(colors.yellow('WARN') + " You havn't create a server yet, please use " + colors.cyan('createServer()') + " function.");
+            return null;
+        }
         return this.replServer;
     };
     REPL.prototype.log = function () {

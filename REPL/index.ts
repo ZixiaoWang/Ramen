@@ -44,15 +44,6 @@ export class REPL {
         return this;
     }
 
-    protected setPrompt(prompt: string): REPL {
-        let tempPrompt = prompt;
-        if(typeof prompt !== 'string') {
-            tempPrompt = tempPrompt.toString();
-        }
-        this.replOptions.prompt = tempPrompt || '> ';
-        return this;
-    }
-
     protected setInput(input: NodeJS.ReadableStream): REPL {
         if(input) {
             this.replOptions.input = input;
@@ -126,6 +117,19 @@ export class REPL {
         return this;
     }
 
+    setPrompt(prompt?: string): REPL {
+        let tempPrompt = prompt || this.replOptions.prompt || '> ';
+        if(typeof prompt !== 'string') {
+            tempPrompt = tempPrompt.toString();
+        }
+        if(this.replServer) {
+            this.replServer.setPrompt( colors.green(tempPrompt) );
+        }else{
+            this.replOptions.prompt = tempPrompt || '> ';
+        }
+        return this;
+    }
+
     setCommand(cmd: string, action: Function, description?: string): REPL {
         this.commandList.push({
             cmd: cmd,
@@ -145,8 +149,11 @@ export class REPL {
         return this;
     }
 
-    getNativeServer(): REPLServer {
-        this.log(`${ colors.yellow('WARN') } You havn't create a server yet, please use ${ colors.cyan('createServer()') } function.`);
+    getNativeServer(): REPLServer | null {
+        if(this.replServer === undefined) {
+            this.log(`${ colors.yellow('WARN') } You havn't create a server yet, please use ${ colors.cyan('createServer()') } function.`);
+            return null;
+        }
         return this.replServer;
     }
 

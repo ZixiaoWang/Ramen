@@ -12,6 +12,8 @@ export class Ramen {
     private PORT: number = 5000;
     private SERVER_COUNT = 1;
     private outputer: any = console;
+    private theFocusedServer: SocketServer | undefined = undefined;
+    private theFocusedConnection: WebSocket | undefined = undefined;
 
     public focusedServer: Array<SocketServer> = [];
     public focusedConnections: Array<WebSocket> = [];
@@ -103,6 +105,21 @@ export class Ramen {
 
         this.outputer.console(`Cannot find connection ${ hex }`);
         return undefined;
+    }
+
+    focusOnConnection(hex: string): boolean{
+        let theConnection = this.getConnectionByHex(hex);
+
+        if(theConnection){
+            this.theFocusedConnection = theConnection;
+            return true;
+        }
+
+        return false;
+    }
+
+    getTheFocusedConnection(): WebSocket | undefined {
+        return this.theFocusedConnection;
     }
 
     broadcast(data: any): void{

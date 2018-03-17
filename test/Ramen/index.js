@@ -9,6 +9,8 @@ var Ramen = /** @class */ (function () {
         this.PORT = 5000;
         this.SERVER_COUNT = 1;
         this.outputer = console;
+        this.theFocusedServer = undefined;
+        this.theFocusedConnection = undefined;
         this.focusedServer = [];
         this.focusedConnections = [];
         this.serverMap = new Map();
@@ -81,6 +83,17 @@ var Ramen = /** @class */ (function () {
         }
         this.outputer.console("Cannot find connection " + hex);
         return undefined;
+    };
+    Ramen.prototype.focusOnConnection = function (hex) {
+        var theConnection = this.getConnectionByHex(hex);
+        if (theConnection) {
+            this.theFocusedConnection = theConnection;
+            return true;
+        }
+        return false;
+    };
+    Ramen.prototype.getTheFocusedConnection = function () {
+        return this.theFocusedConnection;
     };
     Ramen.prototype.broadcast = function (data) {
         var countNumber = 0;
