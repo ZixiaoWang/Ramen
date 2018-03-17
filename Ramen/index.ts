@@ -118,6 +118,11 @@ export class Ramen {
         return false;
     }
 
+    unfocusConnection(): boolean {
+        this.theFocusedConnection = undefined;
+        return true;
+    }
+
     getTheFocusedConnection(): WebSocket | undefined {
         return this.theFocusedConnection;
     }

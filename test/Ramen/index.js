@@ -92,6 +92,10 @@ var Ramen = /** @class */ (function () {
         }
         return false;
     };
+    Ramen.prototype.unfocusConnection = function () {
+        this.theFocusedConnection = undefined;
+        return true;
+    };
     Ramen.prototype.getTheFocusedConnection = function () {
         return this.theFocusedConnection;
     };

@@ -41,14 +41,15 @@ import { Ramen } from './Ramen';
 
 (function setRelpServer(){
     const HELP = new Map([
-        ["create", `\r\t    [SOCKET] Quickly set up a server with default port 500\n\t    e.g. ${ colors.green('.create [name]') }`],
-        ["list", `\r\t    [SOCKET] List all the Servers.\n\t    e.g. ${ colors.green('.list servers') } or ${ colors.green('.list connections') }`],
-        ["focus", `\r\t    [SOCKET] Use a specific Connection by entering the hex string.\n\t     e.g. ${ colors.green('.focus 23de7a13') }`],
-        ["unfocus", `\r\t    [SOCKET] Unfocus the connections. \n\t    .e.g. ${ colors.green('.unfocus') }`],
-        ["broadcast", `\r\t    [SOCKET] Broadcast the arguments (string) to all connected clients. \n\t    e.g. ${ colors.green('.broadcast Hello World') }`],
-        ["close", `\r\t    [SOCKET] Close the server or a specific connection. \n\t     e.g. ${ colors.green('.close <type> <name>') } \n\t     --type \t one of "server", "connection" and "client" \n\t     --name \t The server name, or connection hex string.`],
-        ["shutdown", `\r\t    [SOCKET] Shut down one or more specific server. \n\t    e.g. ${ colors.green('.shutdown [...serverName]') }`],
-        ["--help", `\r\t    [SOCKET] Showing all the costomized commands.`]
+        ["create", `\r\t\t${ colors.bgGreen('[SOCKET]') } Quickly set up a server with default port 500\n\t\te.g. ${ colors.green('.create [name]') }`],
+        ["list", `\r\t\t${ colors.bgGreen('[SOCKET]') } List all the Servers.\n\t\te.g. ${ colors.green('.list servers') } or ${ colors.green('.list connections') }`],
+        ["focus", `\r\t\t${ colors.bgGreen('[SOCKET]') } Use a specific Connection by entering the hex string.\n\t\t e.g. ${ colors.green('.focus 23de7a13') }`],
+        ["unfocus", `\r\t\t${ colors.bgGreen('[SOCKET]') } Unfocus the connections. \n\t\t.e.g. ${ colors.green('.unfocus') }`],
+        ["send", `\r\t\t${ colors.bgGreen('[SOCKET]') } Send message. This operation requires an focused connection, otherwise plase use "${ colors.green('.broadcast <message>') }".\n\t\te.g.${ colors.green('.send "Hello World"') }`],
+        ["broadcast", `\r\t\t${ colors.bgGreen('[SOCKET]') } Broadcast the arguments (string) to all connected clients. \n\t\te.g. ${ colors.green('.broadcast Hello World') }`],
+        ["close", `\r\t\t${ colors.bgGreen('[SOCKET]') } Close the server or a specific connection. \n\t\t e.g. ${ colors.green('.close <type> <name>') } \n\t\t --type \t one of "server", "connection" and "client" \n\t\t --name \t The server name, or connection hex string.`],
+        ["shutdown", `\r\t\t${ colors.bgGreen('[SOCKET]') } Shut down one or more specific server. \n\t\te.g. ${ colors.green('.shutdown [...serverName]') }`],
+        ["--help", `\r\t\t${ colors.bgGreen('[SOCKET]') } Showing all the costomized commands.`]
     ]);
 
     let replServer = new REPL();
@@ -113,13 +114,26 @@ import { Ramen } from './Ramen';
                     console.log(`Cannot find any connections being focused.`);
                     replServer.displayPrompt();
                 }else{
-                    let theFocusedConnection = ramen.getTheFocusedConnection();
-                    theFocusedConnection = undefined;
+                    ramen.unfocusConnection();
                     replServer.setPrompt(defaultPrompt);
                     replServer.log('The connection has unfocused.');
                 }
             },
             HELP.get('unfocus')
+        )
+        .setCommand('send',
+            (arg: string) => {
+                if(ramen.getTheFocusedConnection() === undefined) {
+                    console.log(`You have to focus on one connection to send messages. please use "${ colors.green(".focus <hex>") }" or "${ colors.green('.broadcast <message>') }" to broadcast to all connections`);
+                    replServer.displayPrompt();
+                    return undefined;
+                }
+                let data = eval(arg);
+                let theConnection = ramen.getTheFocusedConnection() as WebSocket;
+                theConnection.send(data);
+                replServer.displayPrompt();
+            },
+            HELP.get('send')
         )
         .setCommand('broadcast',
             (args: string) => {
