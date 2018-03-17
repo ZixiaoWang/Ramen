@@ -10,8 +10,7 @@ Ramen is a mock socket server which use CLI to interact with clients.
 Once you've installed ramen globally, or installed Ramen locally but linked to it.  
 You may use ```Ramen``` to start Ramen console.
 ```javascript
-    ramen
-    // or "ngx ramen" if you've install Ramen locally.
+    ramen   // or "ngx ramen" if you've install Ramen locally.
 ```
 and When you opened Ramen console, you may start using Ramen's commands:   
 ```javascript
@@ -39,13 +38,11 @@ and When you opened Ramen console, you may start using Ramen's commands:
 ### 
 
 ### TODOS
-- Core Module [50%]
-    - Added BufferFactory
-- Server Module
-    - Added SocketServer
-- Client Module
-    - Pending...
-- start index.js
-```
-    Jesus, quite a lot works to do...
-```
+- Commands
+    * listen
+    * chat
+- SocketServer
+    * unBindEventListner
+- Ramen
+    * listen()
+    * chat()
