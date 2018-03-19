@@ -13,7 +13,8 @@
                 this.$$connection.close();
             }
             this.$$connection = new WebSocket(`ws://localhost:${ this.$$defaultPort }`);
-            this.$$connection.addEventListener('message', console.log);
+            this.$$connection.addEventListener('message', (event) => { console.log(`[<<<] ${event.data}`) });
+            return this.$$connection;
         }
     }
 

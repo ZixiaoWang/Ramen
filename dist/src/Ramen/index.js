@@ -88,14 +88,21 @@ var Ramen = /** @class */ (function () {
         return undefined;
     };
     Ramen.prototype.focusOnConnection = function (hex) {
+        var _this = this;
         var theConnection = this.getConnectionByHex(hex);
         if (theConnection) {
             this.theFocusedConnection = theConnection;
+            this.theFocusedConnection.onmessage = function (event) {
+                _this.outputer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
+            };
             return true;
         }
         return false;
     };
     Ramen.prototype.unfocusConnection = function () {
+        var theConnection = this.theFocusedConnection;
+        theConnection.onmessage = function () { };
+        theConnection = null;
         this.theFocusedConnection = undefined;
         return true;
     };

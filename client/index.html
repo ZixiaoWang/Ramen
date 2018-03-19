@@ -15,9 +15,10 @@
     <script>
         let connectBtn = document.getElementById('connectBtn');
         let rc = new RamenClient();
+        let websocket;
 
         connectBtn.addEventListener('click', () => {
-            rc.connect();
+            websocket = rc.connect();
         })
     </script>
 </body>

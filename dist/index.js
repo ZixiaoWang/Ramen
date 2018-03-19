@@ -41,6 +41,7 @@ var Ramen_1 = require("./src/Ramen");
         ["broadcast", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Broadcast the arguments (string) to all connected clients. \n\t\te.g. " + colors.green('.broadcast Hello World')],
         ["close", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Close the server or a specific connection. \n\t\t e.g. " + colors.green('.close <type> <name>') + " \n\t\t --type \t one of \"server\", \"connection\" and \"client\" \n\t\t --name \t The server name, or connection hex string."],
         ["shutdown", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
+        ["ping", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Send a ping to the focused client. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
         ["--help", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Showing all the costomized commands."]
     ]);
     var replServer = new REPL_1.REPL();
@@ -112,6 +113,24 @@ var Ramen_1 = require("./src/Ramen");
         theConnection.send(data);
         replServer.displayPrompt();
     }, HELP.get('send'))
+        .setCommand('ping', function () {
+        if (ramen.getTheFocusedConnection() === undefined) {
+            console.log("You have to focus on one connection to send messages. please use \"" + colors.green(".focus <hex>") + "\" or \"" + colors.green('.broadcast <message>') + "\" to broadcast to all connections");
+            replServer.displayPrompt();
+            return undefined;
+        }
+        var pingStart;
+        var onPong = function () {
+            var pingPong = Date.now() - pingStart;
+            replServer.log("[" + colors.yellow('PONG') + "] in " + colors.green(pingPong.toString()) + " ms");
+            theConnection.removeEventListener('pong', onPong);
+        };
+        var theConnection = ramen.getTheFocusedConnection();
+        theConnection.addEventListener('pong', onPong);
+        pingStart = Date.now();
+        theConnection.ping();
+        replServer.displayPrompt();
+    }, HELP.get('ping'))
         .setCommand('broadcast', function (args) {
         ramen.broadcast(args);
     }, HELP.get('broadcase'))

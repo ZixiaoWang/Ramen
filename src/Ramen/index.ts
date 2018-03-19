@@ -1,6 +1,7 @@
 import * as program from 'commander';
 import * as WebSocket from 'ws';
 import * as colors from 'colors';
+import * as printf from 'printf';
 import { crc32 } from 'js-crc';
 
 import { REPL } from '../REPL/';
@@ -116,6 +117,9 @@ export class Ramen {
 
         if(theConnection){
             this.theFocusedConnection = theConnection;
+            this.theFocusedConnection.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
+                this.outputer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+            }
             return true;
         }
 
@@ -123,6 +127,9 @@ export class Ramen {
     }
 
     unfocusConnection(): boolean {
+        let theConnection: WebSocket | null = this.theFocusedConnection as WebSocket;
+        theConnection.onmessage = () => {};
+        theConnection = null;
         this.theFocusedConnection = undefined;
         return true;
     }
