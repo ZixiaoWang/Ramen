@@ -3,8 +3,8 @@ import * as WebSocket from 'ws';
 import * as colors from 'colors';
 import { crc32 } from 'js-crc';
 
-import { REPL } from '../REPL';
-import { SocketServer } from '../SocketServer';
+import { REPL } from '../REPL/';
+import { SocketServer } from '../SocketServer/';
 import { tablifyServers, tablifyConnections } from '../Utils/tablify';
 
 export class Ramen {
