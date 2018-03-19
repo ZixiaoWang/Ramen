@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Ramen Client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="index.css" />
+</head>
+<body>
+    <div class="container">
+        <button class="connect-btn" id="connectBtn">CONNECT</button>
+    </div>
+    <script src="ramen-client.js"></script>
+    <script>
+        let connectBtn = document.getElementById('connectBtn');
+        let rc = new RamenClient();
+
+        connectBtn.addEventListener('click', () => {
+            rc.connect();
+        })
+    </script>
+</body>
+</html>

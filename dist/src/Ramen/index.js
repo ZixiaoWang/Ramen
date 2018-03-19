@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var colors = require("colors");
 var js_crc_1 = require("js-crc");
-var SocketServer_1 = require("../SocketServer");
+var _1 = require("../SocketServer/");
 var tablify_1 = require("../Utils/tablify");
 var Ramen = /** @class */ (function () {
     function Ramen() {
@@ -27,7 +27,7 @@ var Ramen = /** @class */ (function () {
             this.outputer.console("[" + colors.red('ERROR') + "] " + serverName + " has already existed!");
             return;
         }
-        var socketServer = new SocketServer_1.SocketServer();
+        var socketServer = new _1.SocketServer();
         socketServer
             .setOnCreateCallback(function () {
             _this.serverMap.set(serverName, socketServer);

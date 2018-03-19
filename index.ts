@@ -7,10 +7,10 @@ import * as WebSocket from 'ws';
 import * as colors from 'colors';
 import { crc32 } from 'js-crc';
 
-import { REPL } from './REPL';
-import { SocketServer } from './SocketServer';
-import { tablifyServers, tablifyConnections } from './Utils/Tablify';
-import { Ramen } from './Ramen';
+import { REPL } from './src/REPL';
+import { SocketServer } from './src/SocketServer';
+import { tablifyServers, tablifyConnections } from './src/Utils/Tablify';
+import { Ramen } from './src/Ramen';
 
 
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

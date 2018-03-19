@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var WebSocket = require("ws");
 var colors = require("colors");
-var REPL_1 = require("./REPL");
-var SocketServer_1 = require("./SocketServer");
-var Ramen_1 = require("./Ramen");
+var REPL_1 = require("./src/REPL");
+var SocketServer_1 = require("./src/SocketServer");
+var Ramen_1 = require("./src/Ramen");
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //                       _oo0oo_
