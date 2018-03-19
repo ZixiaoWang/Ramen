@@ -33,15 +33,15 @@ var Ramen_1 = require("./Ramen");
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (function setRelpServer() {
     var HELP = new Map([
-        ["create", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Quickly set up a server with default port 500\n\t\te.g. " + colors.green('.create [name]')],
-        ["list", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" List all the Servers.\n\t\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections')],
-        ["focus", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Use a specific Connection by entering the hex string.\n\t\t e.g. " + colors.green('.focus 23de7a13')],
-        ["unfocus", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Unfocus the connections. \n\t\t.e.g. " + colors.green('.unfocus')],
-        ["send", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Send message. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
-        ["broadcast", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Broadcast the arguments (string) to all connected clients. \n\t\te.g. " + colors.green('.broadcast Hello World')],
-        ["close", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Close the server or a specific connection. \n\t\t e.g. " + colors.green('.close <type> <name>') + " \n\t\t --type \t one of \"server\", \"connection\" and \"client\" \n\t\t --name \t The server name, or connection hex string."],
-        ["shutdown", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
-        ["--help", "\r\t\t\"" + colors.bgGreen('[SOCKET]') + "\" Showing all the costomized commands."]
+        ["create", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Quickly set up a server with default port 500\n\t\te.g. " + colors.green('.create [name]')],
+        ["list", "\r\t\t" + colors.bgGreen('[SOCKET]') + " List all the Servers.\n\t\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections')],
+        ["focus", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Use a specific Connection by entering the hex string.\n\t\t e.g. " + colors.green('.focus 23de7a13')],
+        ["unfocus", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Unfocus the connections. \n\t\t.e.g. " + colors.green('.unfocus')],
+        ["send", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Send message. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
+        ["broadcast", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Broadcast the arguments (string) to all connected clients. \n\t\te.g. " + colors.green('.broadcast Hello World')],
+        ["close", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Close the server or a specific connection. \n\t\t e.g. " + colors.green('.close <type> <name>') + " \n\t\t --type \t one of \"server\", \"connection\" and \"client\" \n\t\t --name \t The server name, or connection hex string."],
+        ["shutdown", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
+        ["--help", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Showing all the costomized commands."]
     ]);
     var replServer = new REPL_1.REPL();
     var defaultPrompt = colors.green('Ramen> ');

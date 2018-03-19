@@ -44,6 +44,9 @@ var Ramen = /** @class */ (function () {
             Object.defineProperty(websocket, 'hex', { value: hexString, writable: false, enumerable: false });
             websocket.url = remoteAddress;
             connection.set(hexString, websocket);
+            websocket.onclose = function () {
+                connection.delete(hexString);
+            };
             _this.outputer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
         })
             .createServer(this.PORT);

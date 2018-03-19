@@ -56,6 +56,10 @@ export class Ramen {
                 Object.defineProperty(websocket, 'hex', { value: hexString, writable: false, enumerable: false });
                 websocket.url = remoteAddress;
                 connection.set(hexString, websocket);
+
+                websocket.onclose = () => {
+                    connection.delete(hexString);
+                }
                 this.outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
             })
             .createServer(this.PORT);
