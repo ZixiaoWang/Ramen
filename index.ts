@@ -45,7 +45,7 @@ import { Ramen } from './src/Ramen';
         ["list", `\r\t\t${ colors.green('[SOCKET]') } List all the Servers.\n\t\talias ${ colors.green('.ls') }\n\t\te.g. ${ colors.green('.list servers') } or ${ colors.green('.list connections') } or ${ colors.green('.ls c') }`],
         ["focus", `\r\t\t${ colors.green('[SOCKET]') } Use a specific Connection by entering the hex string.\n\t\talias ${ colors.green('.fcs') }\n\t\te.g. ${ colors.green('.focus 23de7a13') } or ${ colors.green('.fcs 23de7a13') }`],
         ["unfocus", `\r\t\t${ colors.green('[SOCKET]') } Unfocus the connections. \n\t\t.e.g. ${ colors.green('.unfocus') }`],
-        ["send", `\r\t\t${ colors.green('[SOCKET]') } Send message. This operation requires an focused connection, otherwise plase use "${ colors.green('.broadcast <message>') }".\n\t\te.g.${ colors.green('.send "Hello World"') }`],
+        ["send", `\r\t\t${ colors.green('[SOCKET]') } Send message. This operation requires an focused connection, otherwise plase use "${ colors.green('.broadcast <message>') }".\n\t\talias ${ colors.green('.s') }\n\t\te.g.${ colors.green('.send "Hello World"') } or ${ colors.green('.s "Hello World"') }`],
         ["broadcast", `\r\t\t${ colors.green('[SOCKET]') } Broadcast the arguments (string) to all connected clients. \n\t\te.g. ${ colors.green('.broadcast Hello World') }`],
         ["close", `\r\t\t${ colors.green('[SOCKET]') } Close the a specific connection by hex, or use "${ colors.green('--all') } to close all the existing connections". \n\t\talias ${ colors.green('.cls') }\n\t\te.g. ${ colors.green('.close <hex> | --all') } or ${ colors.green('.cls --all') }`],
         ["shutdown", `\r\t\t${ colors.green('[SOCKET]') } Shut down one or more specific server. \n\t\te.g. ${ colors.green('.shutdown [...serverName]') }`],
@@ -242,14 +242,17 @@ import { Ramen } from './src/Ramen';
         .setCommand('ls', list, HELP.get('list') )
         .setCommand('focus', focus, HELP.get('focus') )
         .setCommand('fcs', focus, HELP.get('focus') )
-        .setCommand('unfocus', unfocus, HELP.get('unfocus') )
-        .setCommand('send', send, HELP.get('send') )
-        .setCommand('ping', ping, HELP.get('ping') )
-        .setCommand('broadcast', broadcast, HELP.get('broadcase') )
         .setCommand('close', close, HELP.get('close') )
         .setCommand('cls', close, HELP.get('close') )
+        .setCommand('unfocus', unfocus, HELP.get('unfocus') )
+        .setCommand('send', send, HELP.get('send') )
+        .setCommand('s', send, HELP.get('send') )
+        .setCommand('ping', ping, HELP.get('ping') )
+        .setCommand('broadcast', broadcast, HELP.get('broadcase') )
+        
         .setCommand('shutdown', shutdown, HELP.get('shutdown') )
         .setCommand('--help', showHelp, HELP.get('--help') )
+        .setCommand('h', showHelp, HELP.get('--help') )
 
         .console(defaultPrompt);
 })();

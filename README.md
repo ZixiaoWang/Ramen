@@ -25,24 +25,12 @@ and When you opened Ramen console, you may start using Ramen's commands:
 
 
 ### Commands
-- .create
-- .list
-- .focus
+- .create, .crt
+- .list, .ls
+- .focus, .fcs
 - .unfocus
-- .send
+- .send, .s
 - .broadcast
-- .close
+- .close, .cls
 - .shutdown
-- .--help
-
-### 
-
-### TODOS
-- Commands
-    * listen
-    * chat
-- SocketServer
-    * unBindEventListner
-- Ramen
-    * listen()
-    * chat()
+- .--help, .h
