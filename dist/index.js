@@ -33,33 +33,28 @@ var Ramen_1 = require("./src/Ramen");
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (function setRelpServer() {
     var HELP = new Map([
-        ["create", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Quickly set up a server with default port 500\n\t\te.g. " + colors.green('.create [name]')],
-        ["list", "\r\t\t" + colors.bgGreen('[SOCKET]') + " List all the Servers.\n\t\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections')],
-        ["focus", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Use a specific Connection by entering the hex string.\n\t\t e.g. " + colors.green('.focus 23de7a13')],
-        ["unfocus", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Unfocus the connections. \n\t\t.e.g. " + colors.green('.unfocus')],
-        ["send", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Send message. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
-        ["broadcast", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Broadcast the arguments (string) to all connected clients. \n\t\te.g. " + colors.green('.broadcast Hello World')],
-        ["close", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Close the a specific connection by hex, or use \"" + colors.green('--all') + " to close all the existing connections\". \n\t\t e.g. " + colors.green('.close <hex> | --all')],
-        ["shutdown", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
-        ["ping", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Send a ping to the focused client. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
-        ["--help", "\r\t\t" + colors.bgGreen('[SOCKET]') + " Showing all the costomized commands."]
+        ["create", "\r\t\t" + colors.green('[SOCKET]') + " Quickly set up a server with default port 5000. \n\t\talias " + colors.green('.crt') + "\n\t\te.g. " + colors.green('.create [name]') + " or " + colors.green('.crt [name]')],
+        ["list", "\r\t\t" + colors.green('[SOCKET]') + " List all the Servers.\n\t\talias " + colors.green('.ls') + "\n\t\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections') + " or " + colors.green('.ls c')],
+        ["focus", "\r\t\t" + colors.green('[SOCKET]') + " Use a specific Connection by entering the hex string.\n\t\talias " + colors.green('.fcs') + "\n\t\te.g. " + colors.green('.focus 23de7a13') + " or " + colors.green('.fcs 23de7a13')],
+        ["unfocus", "\r\t\t" + colors.green('[SOCKET]') + " Unfocus the connections. \n\t\t.e.g. " + colors.green('.unfocus')],
+        ["send", "\r\t\t" + colors.green('[SOCKET]') + " Send message. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
+        ["broadcast", "\r\t\t" + colors.green('[SOCKET]') + " Broadcast the arguments (string) to all connected clients. \n\t\te.g. " + colors.green('.broadcast Hello World')],
+        ["close", "\r\t\t" + colors.green('[SOCKET]') + " Close the a specific connection by hex, or use \"" + colors.green('--all') + " to close all the existing connections\". \n\t\talias " + colors.green('.cls') + "\n\t\te.g. " + colors.green('.close <hex> | --all') + " or " + colors.green('.cls --all')],
+        ["shutdown", "\r\t\t" + colors.green('[SOCKET]') + " Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
+        ["ping", "\r\t\t" + colors.green('[SOCKET]') + " Send a ping to the focused client. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
+        ["--help", "\r\t\t" + colors.green('[SOCKET]') + " Showing all the costomized commands."]
     ]);
     var replServer = new REPL_1.REPL();
     var defaultPrompt = colors.green('Ramen> ');
     var ramen = new Ramen_1.Ramen()
         .setDefaultPrompt(defaultPrompt)
         .setOutputer(replServer);
-    replServer
-        .setVariable('SocketServer', SocketServer_1.SocketServer)
-        .setVariable('WebSocket', WebSocket)
-        .setVariable('REPL', replServer)
-        .setVariable('Ramen', ramen)
-        .setCommand('create', function (serverName) {
+    var create = function (serverName) {
         var name = serverName ? serverName.split(' ')[0] : undefined;
         ramen.createSocketServer(name);
         replServer.displayPrompt();
-    }, HELP.get('create'))
-        .setCommand('list', function (type) {
+    };
+    var list = function (type) {
         if (/^(servers|s)/i.test(type.trim())) {
             ramen.listAllServers();
             replServer.displayPrompt();
@@ -75,8 +70,8 @@ var Ramen_1 = require("./src/Ramen");
             console.log("\t " + colors.green('clients         ') + "\tAlias of " + colors.green('.list connections'));
             replServer.displayPrompt();
         }
-    }, HELP.get('list'))
-        .setCommand('focus', function (hex) {
+    };
+    var focus = function (hex) {
         if (/[0-9a-f]{8}/.test(hex) === false) {
             console.log('Please enter a valid hex string, it should be 8 characters');
             replServer.displayPrompt();
@@ -97,8 +92,8 @@ var Ramen_1 = require("./src/Ramen");
                 };
             }
         }
-    }, HELP.get('focus'))
-        .setCommand('unfocus', function () {
+    };
+    var unfocus = function () {
         if (ramen.getTheFocusedConnection() === undefined) {
             console.log("Cannot find any connections being focused.");
             replServer.displayPrompt();
@@ -108,8 +103,8 @@ var Ramen_1 = require("./src/Ramen");
             replServer.setPrompt(defaultPrompt);
             replServer.log('The connection has unfocused.');
         }
-    }, HELP.get('unfocus'))
-        .setCommand('send', function (arg) {
+    };
+    var send = function (arg) {
         if (ramen.getTheFocusedConnection() === undefined) {
             console.log("You have to focus on one connection to send messages. please use \"" + colors.green(".focus <hex>") + "\" or \"" + colors.green('.broadcast <message>') + "\" to broadcast to all connections");
             replServer.displayPrompt();
@@ -119,8 +114,8 @@ var Ramen_1 = require("./src/Ramen");
         var theConnection = ramen.getTheFocusedConnection();
         theConnection.send(data);
         replServer.displayPrompt();
-    }, HELP.get('send'))
-        .setCommand('ping', function () {
+    };
+    var ping = function () {
         if (ramen.getTheFocusedConnection() === undefined) {
             console.log("You have to focus on one connection to send messages. please use \"" + colors.green(".focus <hex>") + "\" or \"" + colors.green('.broadcast <message>') + "\" to broadcast to all connections");
             replServer.displayPrompt();
@@ -137,13 +132,19 @@ var Ramen_1 = require("./src/Ramen");
         pingStart = Date.now();
         theConnection.ping();
         replServer.displayPrompt();
-    }, HELP.get('ping'))
-        .setCommand('broadcast', function (args) {
+    };
+    var broadcast = function (args) {
         ramen.broadcast(args);
-    }, HELP.get('broadcase'))
-        .setCommand('close', function (arg) {
+    };
+    var close = function (arg) {
+        if (!arg) {
+            console.log('Please enter a connection hex, or use --all to close all connections');
+            replServer.displayPrompt();
+            return undefined;
+        }
         if (/--all/.test(arg) === true) {
             ramen.closeAll();
+            replServer.displayPrompt();
             return true;
         }
         if (/[0-9a-f]{8}/.test(arg) === false) {
@@ -162,9 +163,10 @@ var Ramen_1 = require("./src/Ramen");
             if (websocket) {
                 ramen.closeConnectionByHex(hex);
             }
+            replServer.displayPrompt();
         }
-    }, HELP.get('close'))
-        .setCommand('shutdown', function (arg) {
+    };
+    var shutdown = function (arg) {
         var argArr;
         var argSet;
         if (arg === undefined || arg.length === 0) {
@@ -200,14 +202,33 @@ var Ramen_1 = require("./src/Ramen");
                 replServer.displayPrompt();
             }
         }
-    }, HELP.get('shutdown'))
-        .setCommand('--help', function () {
+    };
+    var showHelp = function () {
         HELP.forEach(function (description, command) {
             console.log(command + description);
             console.log();
         });
         replServer.displayPrompt();
-    }, HELP.get('--help'))
+    };
+    replServer
+        .setVariable('SocketServer', SocketServer_1.SocketServer)
+        .setVariable('WebSocket', WebSocket)
+        .setVariable('REPL', replServer)
+        .setVariable('Ramen', ramen)
+        .setCommand('create', create, HELP.get('create'))
+        .setCommand('crt', create, HELP.get('create'))
+        .setCommand('list', list, HELP.get('list'))
+        .setCommand('ls', list, HELP.get('list'))
+        .setCommand('focus', focus, HELP.get('focus'))
+        .setCommand('fcs', focus, HELP.get('focus'))
+        .setCommand('unfocus', unfocus, HELP.get('unfocus'))
+        .setCommand('send', send, HELP.get('send'))
+        .setCommand('ping', ping, HELP.get('ping'))
+        .setCommand('broadcast', broadcast, HELP.get('broadcase'))
+        .setCommand('close', close, HELP.get('close'))
+        .setCommand('cls', close, HELP.get('close'))
+        .setCommand('shutdown', shutdown, HELP.get('shutdown'))
+        .setCommand('--help', showHelp, HELP.get('--help'))
         .console(defaultPrompt);
 })();
 // program
