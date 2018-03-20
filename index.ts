@@ -47,7 +47,7 @@ import { Ramen } from './src/Ramen';
         ["unfocus", `\r\t\t${ colors.bgGreen('[SOCKET]') } Unfocus the connections. \n\t\t.e.g. ${ colors.green('.unfocus') }`],
         ["send", `\r\t\t${ colors.bgGreen('[SOCKET]') } Send message. This operation requires an focused connection, otherwise plase use "${ colors.green('.broadcast <message>') }".\n\t\te.g.${ colors.green('.send "Hello World"') }`],
         ["broadcast", `\r\t\t${ colors.bgGreen('[SOCKET]') } Broadcast the arguments (string) to all connected clients. \n\t\te.g. ${ colors.green('.broadcast Hello World') }`],
-        ["close", `\r\t\t${ colors.bgGreen('[SOCKET]') } Close the server or a specific connection. \n\t\t e.g. ${ colors.green('.close <type> <name>') } \n\t\t --type \t one of "server", "connection" and "client" \n\t\t --name \t The server name, or connection hex string.`],
+        ["close", `\r\t\t${ colors.bgGreen('[SOCKET]') } Close the a specific connection by hex, or use "${ colors.green('--all') } to close all the existing connections". \n\t\t e.g. ${ colors.green('.close <hex> | --all') }`],
         ["shutdown", `\r\t\t${ colors.bgGreen('[SOCKET]') } Shut down one or more specific server. \n\t\te.g. ${ colors.green('.shutdown [...serverName]') }`],
         ["ping", `\r\t\t${ colors.bgGreen('[SOCKET]') } Send a ping to the focused client. This operation requires an focused connection, otherwise plase use "${ colors.green('.broadcast <message>') }".\n\t\te.g.${ colors.green('.send "Hello World"') }`],
         ["--help", `\r\t\t${ colors.bgGreen('[SOCKET]') } Showing all the costomized commands.`]
@@ -175,55 +175,26 @@ import { Ramen } from './src/Ramen';
             HELP.get('broadcase')
         )
         .setCommand('close',
-            (args: string) => {
-                let type = args.split(' ')[0];
-                let nameArr = args.split(' ').splice(1);
-
-                if(/server|connection|client/.test(type) === false) { 
-                    console.log('Please enter a valid type. (a type is one of "server", "connection" and "client"');
-                    replServer.displayPrompt(); 
-                    return null;   
+            (arg: string) => {
+                if(/--all/.test(arg) === true) {
+                    ramen.closeAll();
+                    return true;
+                }
+                if(/[0-9a-f]{8}/.test(arg) === false) {
+                    console.log('Please enter a valid hex string, it should be 8 characters');
+                    replServer.displayPrompt();
+                    return undefined;
+                }
+                let hex = arg;
+                if(ramen.getConnectionByHex(hex) === undefined) {
+                    console.log(`Cannot find the connection "${ colors.green(hex) }". Please use "${ colors.green('.list connections') }"`);
+                    replServer.displayPrompt();
+                    return undefined;
                 } else {
-                    
-                    if(nameArr.length === 0){
-                        console.log('Please enter a valid name. (a name could be the server name, or the hex string of connections');
-                        replServer.displayPrompt();
-                        return null;
-                    } else if(/server/.test(type) === true) {
-                        nameArr.forEach(name => {
-                            if(ramen.serverMap.has(name) === true) {
-                                let server = ramen.serverMap.get(name) as SocketServer;
-                                server.close();
-                                ramen.serverMap.delete(name);
-                                ramen.connectionsMap.delete(server);
-                                console.log(`$${name} has closed`);
-                            }else{
-                                console.log(`Cannot find Server ${ colors.yellow(name) }`);
-                            }
-                        });
-                        replServer.displayPrompt();
-                    } else if(/connection|client/.test(type) === true) {
-                        nameArr.forEach(name => {
-                            if(ramen.getConnectionByHex(name) !== undefined){
-                                let websocket = ramen.getConnectionByHex(name) as WebSocket;
-                                websocket.close();
+                    let websocket = ramen.getConnectionByHex(hex);
 
-                                try {
-                                    ramen.connectionsMap.forEach((socketMap, socketServer) => {
-                                        if(socketMap.has(name)){
-                                            socketMap.delete(name);
-                                            console.log(`${name} has closed`);
-                                            throw new Error()
-                                        }
-                                    })
-                                }catch(err) {
-                                    // do absolutely nothing here
-                                }
-
-                            }else{
-                                console.log(`Cannot find Connection ${ colors.yellow(name) }`);
-                            }
-                        })
+                    if(websocket) {
+                        ramen.closeConnectionByHex(hex);
                     }
                 }
             },
