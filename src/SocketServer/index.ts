@@ -55,7 +55,7 @@ export class SocketServer {
         return this;
     }
 
-    setOnErrorCallback(callback?: (error: Error) => void) {
+    setOnErrorCallback(callback?: (error: Event) => void) {
         this.onerror = (callback && typeof callback === 'function') ? callback : this.onerror;
         return this;
     }
@@ -111,7 +111,7 @@ export class SocketServer {
 
     private onlistening() {}
 
-    private onerror(error: Error) {
+    private onerror(error: Event) {
         console.log(`[${ colors.red('ERROR') }] ${ error }`);
     }
 }

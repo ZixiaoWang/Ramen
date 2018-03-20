@@ -55,7 +55,9 @@ import { Ramen } from './src/Ramen';
 
     let replServer = new REPL();
     let defaultPrompt = colors.green('Ramen> ');
-    let ramen = new Ramen().setOutputer(replServer);
+    let ramen = new Ramen()
+                    .setDefaultPrompt(defaultPrompt)
+                    .setOutputer(replServer);
 
     replServer
 
@@ -102,9 +104,17 @@ import { Ramen } from './src/Ramen';
                     replServer.displayPrompt();
                     return undefined;
                 } else {
-                    ramen.focusOnConnection(hex);
-                    replServer.setPrompt(`${hex}> `);
-                    replServer.log(`"${ colors.green(hex) }" is focused!`);
+                    let websocket = ramen.focusOnConnection(hex);
+
+                    if(websocket) {
+                        replServer.setPrompt(`${hex}> `);
+                        replServer.log(`"${ colors.green(hex) }" is focused!`);
+
+                        websocket.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
+                            replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+                        }
+
+                    }
                 }
             },
             HELP.get('focus')

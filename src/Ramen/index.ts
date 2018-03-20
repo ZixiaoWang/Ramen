@@ -12,6 +12,7 @@ export class Ramen {
 
     private PORT: number = 5000;
     private SERVER_COUNT = 1;
+    private DEFAULT_PROMPT = '> ';
     private outputer: any = console;
     private theFocusedServer: SocketServer | undefined = undefined;
     private theFocusedConnection: WebSocket | undefined = undefined;
@@ -22,6 +23,11 @@ export class Ramen {
     public connectionsMap: Map<SocketServer, Map<string, WebSocket>> = new Map();
 
     constructor() {}
+
+    setDefaultPrompt(prompt: string): Ramen {
+        this.DEFAULT_PROMPT = prompt || this.DEFAULT_PROMPT;
+        return this;
+    }
 
     setOutputer(outputer: REPL | any): Ramen{
         this.outputer = outputer;
@@ -58,8 +64,11 @@ export class Ramen {
                 websocket.url = remoteAddress;
                 connection.set(hexString, websocket);
 
-                websocket.onclose = () => {
+                websocket.onclose = (event: {wasClean: boolean, code: number, reason: string, target: WebSocket}) => {
                     connection.delete(hexString);
+                    this.outputer.setPrompt(this.DEFAULT_PROMPT);
+                    this.outputer.log(`[${ colors.yellow('CLOSED') }] Connection has closed, the reason is "${ event.reason }"`);
+                    this.unfocusConnection();
                 }
                 this.outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
             })
@@ -112,23 +121,46 @@ export class Ramen {
         return undefined;
     }
 
-    focusOnConnection(hex: string): boolean{
+    closeConnectionByHex(hex: string): boolean {
+        if(/[0-9a-f]{8}/i.test(hex) !== true){
+            this.outputer.console(`[${ colors.red('ERROR') }] Please enter a valid Hex String. e.g. 234d4ac3`);
+            return false;
+        }
+
+        let connectionInterator = this.connectionsMap.values();
+
+        for(let i=0; i<this.connectionsMap.size; i++) {
+            let hexMap = connectionInterator.next().value;
+            if(hexMap.has(hex) === true) {
+                let connection = hexMap.get(hex) as WebSocket;
+                connection.close();
+                hexMap.delete(hex);
+                return true;
+            }else{
+                continue;
+            }
+        }
+
+        this.outputer.console(`Cannot find connection ${ hex }`);
+        return true;
+    }
+
+    focusOnConnection(hex: string): WebSocket | undefined{
         let theConnection = this.getConnectionByHex(hex);
 
         if(theConnection){
             this.theFocusedConnection = theConnection;
-            this.theFocusedConnection.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
-                this.outputer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
-            }
-            return true;
+            return theConnection;
         }
 
-        return false;
+        return undefined;
     }
 
     unfocusConnection(): boolean {
         let theConnection: WebSocket | null = this.theFocusedConnection as WebSocket;
-        theConnection.onmessage = () => {};
+        if(theConnection) {
+            theConnection.onmessage = () => {};
+        }
         theConnection = null;
         this.theFocusedConnection = undefined;
         return true;

@@ -46,7 +46,9 @@ var Ramen_1 = require("./src/Ramen");
     ]);
     var replServer = new REPL_1.REPL();
     var defaultPrompt = colors.green('Ramen> ');
-    var ramen = new Ramen_1.Ramen().setOutputer(replServer);
+    var ramen = new Ramen_1.Ramen()
+        .setDefaultPrompt(defaultPrompt)
+        .setOutputer(replServer);
     replServer
         .setVariable('SocketServer', SocketServer_1.SocketServer)
         .setVariable('WebSocket', WebSocket)
@@ -86,9 +88,14 @@ var Ramen_1 = require("./src/Ramen");
             return undefined;
         }
         else {
-            ramen.focusOnConnection(hex);
-            replServer.setPrompt(hex + "> ");
-            replServer.log("\"" + colors.green(hex) + "\" is focused!");
+            var websocket = ramen.focusOnConnection(hex);
+            if (websocket) {
+                replServer.setPrompt(hex + "> ");
+                replServer.log("\"" + colors.green(hex) + "\" is focused!");
+                websocket.onmessage = function (event) {
+                    replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
+                };
+            }
         }
     }, HELP.get('focus'))
         .setCommand('unfocus', function () {

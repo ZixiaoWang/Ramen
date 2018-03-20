@@ -8,6 +8,7 @@ var Ramen = /** @class */ (function () {
     function Ramen() {
         this.PORT = 5000;
         this.SERVER_COUNT = 1;
+        this.DEFAULT_PROMPT = '> ';
         this.outputer = console;
         this.theFocusedServer = undefined;
         this.theFocusedConnection = undefined;
@@ -16,6 +17,10 @@ var Ramen = /** @class */ (function () {
         this.serverMap = new Map();
         this.connectionsMap = new Map();
     }
+    Ramen.prototype.setDefaultPrompt = function (prompt) {
+        this.DEFAULT_PROMPT = prompt || this.DEFAULT_PROMPT;
+        return this;
+    };
     Ramen.prototype.setOutputer = function (outputer) {
         this.outputer = outputer;
         return this;
@@ -44,8 +49,11 @@ var Ramen = /** @class */ (function () {
             Object.defineProperty(websocket, 'hex', { value: hexString, writable: false, enumerable: false });
             websocket.url = remoteAddress;
             connection.set(hexString, websocket);
-            websocket.onclose = function () {
+            websocket.onclose = function (event) {
                 connection.delete(hexString);
+                _this.outputer.setPrompt(_this.DEFAULT_PROMPT);
+                _this.outputer.log("[" + colors.yellow('CLOSED') + "] Connection has closed, the reason is \"" + event.reason + "\"");
+                _this.unfocusConnection();
             };
             _this.outputer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
         })
@@ -87,21 +95,40 @@ var Ramen = /** @class */ (function () {
         this.outputer.console("Cannot find connection " + hex);
         return undefined;
     };
+    Ramen.prototype.closeConnectionByHex = function (hex) {
+        if (/[0-9a-f]{8}/i.test(hex) !== true) {
+            this.outputer.console("[" + colors.red('ERROR') + "] Please enter a valid Hex String. e.g. 234d4ac3");
+            return false;
+        }
+        var connectionInterator = this.connectionsMap.values();
+        for (var i = 0; i < this.connectionsMap.size; i++) {
+            var hexMap = connectionInterator.next().value;
+            if (hexMap.has(hex) === true) {
+                var connection = hexMap.get(hex);
+                connection.close();
+                hexMap.delete(hex);
+                return true;
+            }
+            else {
+                continue;
+            }
+        }
+        this.outputer.console("Cannot find connection " + hex);
+        return true;
+    };
     Ramen.prototype.focusOnConnection = function (hex) {
-        var _this = this;
         var theConnection = this.getConnectionByHex(hex);
         if (theConnection) {
             this.theFocusedConnection = theConnection;
-            this.theFocusedConnection.onmessage = function (event) {
-                _this.outputer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
-            };
-            return true;
+            return theConnection;
         }
-        return false;
+        return undefined;
     };
     Ramen.prototype.unfocusConnection = function () {
         var theConnection = this.theFocusedConnection;
-        theConnection.onmessage = function () { };
+        if (theConnection) {
+            theConnection.onmessage = function () { };
+        }
         theConnection = null;
         this.theFocusedConnection = undefined;
         return true;
