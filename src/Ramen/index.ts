@@ -16,6 +16,7 @@ export class Ramen {
     private outputer: any = console;
     private theFocusedServer: SocketServer | undefined = undefined;
     private theFocusedConnection: WebSocket | undefined = undefined;
+    private theFocusedConnectionHex: string = '';
 
     public focusedServer: Array<SocketServer> = [];
     public focusedConnections: Array<WebSocket> = [];
@@ -135,6 +136,9 @@ export class Ramen {
                 let connection = hexMap.get(hex) as WebSocket;
                 connection.close();
                 hexMap.delete(hex);
+                if(this.theFocusedConnectionHex === hex) {
+                    this.unfocusConnection();
+                }
                 return true;
             }else{
                 continue;
@@ -150,6 +154,7 @@ export class Ramen {
 
         if(theConnection){
             this.theFocusedConnection = theConnection;
+            this.theFocusedConnectionHex = hex;
             return theConnection;
         }
 
@@ -157,42 +162,24 @@ export class Ramen {
     }
 
     focusOnConnectionByIndex(index: number): { socket: WebSocket, hex: string } | undefined {
-        let theIndex = index;
-        let theMap;
-        let theHex;
-        let theConnection;
-        let connectionInterator = this.connectionsMap.values();
+        let hexList: string[] = [];
 
-        for(let i=0; i<this.connectionsMap.size; i++) {
-            let hexMap = connectionInterator.next().value;
-            if(hexMap.size <= theIndex) {
-                theMap = hexMap;
-                break;
-            }
-            theIndex -= hexMap.size;
-            continue;
-        }
+        this.connectionsMap.forEach((clientsOfEachServer) => {
+            clientsOfEachServer.forEach((client, hex) => {
+                hexList.push(hex);
+            })
+        });
 
-        if(theMap === undefined) {
-            this.outputer.log('The index is out of range');
+        if(index > hexList.length) {
             return undefined;
         }
+        
+        let websocket = this.getConnectionByHex(hexList[index - 1]);
 
-        let clientInterator = theMap.entries();
-
-        for(let i=0; i<theMap.size; i++) {
-            let client = clientInterator.next().value;
-            if( i === theIndex - 1) {
-                theHex = client[0] as string;
-                theConnection = client[1] as WebSocket;
-                break;
-            }
-            continue;
-        }
-
-        if(theConnection) {
-            this.theFocusedConnection = theConnection;
-            return { socket: theConnection, hex: theHex ? theHex : '' };
+        if(websocket) {
+            this.theFocusedConnection = websocket;
+            this.theFocusedConnectionHex = hexList[index - 1];
+            return { socket: websocket, hex: hexList[index - 1] };
         }
 
         return undefined;
@@ -205,11 +192,16 @@ export class Ramen {
         }
         theConnection = null;
         this.theFocusedConnection = undefined;
+        this.theFocusedConnectionHex = '';
         return true;
     }
 
     getTheFocusedConnection(): WebSocket | undefined {
         return this.theFocusedConnection;
+    }
+
+    getTheFocusedConnectionHex(): string {
+        return this.theFocusedConnectionHex;
     }
 
     broadcast(data: any): void{

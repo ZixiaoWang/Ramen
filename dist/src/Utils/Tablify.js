@@ -25,12 +25,14 @@ exports.tablifyServers = tablifyServers;
 function tablifyConnections(connectionMap) {
     if (connectionMap instanceof Map === true ||
         connectionMap instanceof WeakMap === true) {
-        var colFormat_2 = ['%-10s', '%-20s', '%-8d', '%-10d'];
-        var colLabels = ['HEX', 'REMOTER', 'PORT', 'STATE'];
-        console.log(colors.green(printf.apply(void 0, ["\t%-10s%-20s%-8s%-10s"].concat(colLabels))));
+        var index_1 = 0;
+        var colFormat_2 = ['%-10d', '%-10s', '%-20s', '%-8d', '%-10d'];
+        var colLabels = ['NO.', 'HEX', 'REMOTER', 'PORT', 'STATE'];
+        console.log(colors.green(printf.apply(void 0, ["\t%-10s%-10s%-20s%-8s%-10s"].concat(colLabels))));
         connectionMap.forEach(function (singleServerConnection, socketServer) {
             singleServerConnection.forEach(function (websocket, hex) {
-                console.log(printf("\t" + colFormat_2.join(''), hex, websocket.url, socketServer.getPort(), websocket.readyState));
+                index_1++;
+                console.log(printf("\t" + colFormat_2.join(''), index_1, hex, websocket.url, socketServer.getPort(), websocket.readyState));
             });
         });
     }

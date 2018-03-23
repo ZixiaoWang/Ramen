@@ -30,19 +30,20 @@ export function tablifyServers(
     }
 }
 
-export function tablifyConnections(
-    connectionMap: Map<SocketServer, Map<string, WebSocket>>) {
-    
+export function tablifyConnections(connectionMap: Map<SocketServer, Map<string, WebSocket>>) {
+
     if( connectionMap instanceof Map === true ||
         connectionMap instanceof WeakMap === true
     ) {
-        let colFormat = ['%-10s', '%-20s', '%-8d', '%-10d'];
-        let colLabels = ['HEX', 'REMOTER', 'PORT', 'STATE']
+        let index: number = 0;
+        let colFormat = ['%-10d', '%-10s', '%-20s', '%-8d', '%-10d'];
+        let colLabels = ['NO.', 'HEX', 'REMOTER', 'PORT', 'STATE']
 
-        console.log( colors.green(printf(`\t%-10s%-20s%-8s%-10s`, ...colLabels)) );
+        console.log( colors.green(printf(`\t%-10s%-10s%-20s%-8s%-10s`, ...colLabels)) );
         connectionMap.forEach((singleServerConnection, socketServer) => {
             singleServerConnection.forEach((websocket, hex) => {
-                console.log(printf(`\t${ colFormat.join('') }`, hex, websocket.url, socketServer.getPort(), websocket.readyState));
+                index ++;
+                console.log(printf(`\t${ colFormat.join('') }`, index, hex, websocket.url, socketServer.getPort(), websocket.readyState));
             })
         })
     }

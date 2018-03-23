@@ -12,6 +12,7 @@ var Ramen = /** @class */ (function () {
         this.outputer = console;
         this.theFocusedServer = undefined;
         this.theFocusedConnection = undefined;
+        this.theFocusedConnectionHex = '';
         this.focusedServer = [];
         this.focusedConnections = [];
         this.serverMap = new Map();
@@ -107,6 +108,9 @@ var Ramen = /** @class */ (function () {
                 var connection = hexMap.get(hex);
                 connection.close();
                 hexMap.delete(hex);
+                if (this.theFocusedConnectionHex === hex) {
+                    this.unfocusConnection();
+                }
                 return true;
             }
             else {
@@ -120,42 +124,26 @@ var Ramen = /** @class */ (function () {
         var theConnection = this.getConnectionByHex(hex);
         if (theConnection) {
             this.theFocusedConnection = theConnection;
+            this.theFocusedConnectionHex = hex;
             return theConnection;
         }
         return undefined;
     };
     Ramen.prototype.focusOnConnectionByIndex = function (index) {
-        var theIndex = index;
-        var theMap;
-        var theHex;
-        var theConnection;
-        var connectionInterator = this.connectionsMap.values();
-        for (var i = 0; i < this.connectionsMap.size; i++) {
-            var hexMap = connectionInterator.next().value;
-            if (hexMap.size <= theIndex) {
-                theMap = hexMap;
-                break;
-            }
-            theIndex -= hexMap.size;
-            continue;
-        }
-        if (theMap === undefined) {
-            this.outputer.log('The index is out of range');
+        var hexList = [];
+        this.connectionsMap.forEach(function (clientsOfEachServer) {
+            clientsOfEachServer.forEach(function (client, hex) {
+                hexList.push(hex);
+            });
+        });
+        if (index > hexList.length) {
             return undefined;
         }
-        var clientInterator = theMap.entries();
-        for (var i = 0; i < theMap.size; i++) {
-            var client = clientInterator.next().value;
-            if (i === theIndex - 1) {
-                theHex = client[0];
-                theConnection = client[1];
-                break;
-            }
-            continue;
-        }
-        if (theConnection) {
-            this.theFocusedConnection = theConnection;
-            return { socket: theConnection, hex: theHex ? theHex : '' };
+        var websocket = this.getConnectionByHex(hexList[index - 1]);
+        if (websocket) {
+            this.theFocusedConnection = websocket;
+            this.theFocusedConnectionHex = hexList[index - 1];
+            return { socket: websocket, hex: hexList[index - 1] };
         }
         return undefined;
     };
@@ -166,10 +154,14 @@ var Ramen = /** @class */ (function () {
         }
         theConnection = null;
         this.theFocusedConnection = undefined;
+        this.theFocusedConnectionHex = '';
         return true;
     };
     Ramen.prototype.getTheFocusedConnection = function () {
         return this.theFocusedConnection;
+    };
+    Ramen.prototype.getTheFocusedConnectionHex = function () {
+        return this.theFocusedConnectionHex;
     };
     Ramen.prototype.broadcast = function (data) {
         var countNumber = 0;
