@@ -124,6 +124,41 @@ var Ramen = /** @class */ (function () {
         }
         return undefined;
     };
+    Ramen.prototype.focusOnConnectionByIndex = function (index) {
+        var theIndex = index;
+        var theMap;
+        var theHex;
+        var theConnection;
+        var connectionInterator = this.connectionsMap.values();
+        for (var i = 0; i < this.connectionsMap.size; i++) {
+            var hexMap = connectionInterator.next().value;
+            if (hexMap.size <= theIndex) {
+                theMap = hexMap;
+                break;
+            }
+            theIndex -= hexMap.size;
+            continue;
+        }
+        if (theMap === undefined) {
+            this.outputer.log('The index is out of range');
+            return undefined;
+        }
+        var clientInterator = theMap.entries();
+        for (var i = 0; i < theMap.size; i++) {
+            var client = clientInterator.next().value;
+            if (i === theIndex - 1) {
+                theHex = client[0];
+                theConnection = client[1];
+                break;
+            }
+            continue;
+        }
+        if (theConnection) {
+            this.theFocusedConnection = theConnection;
+            return { socket: theConnection, hex: theHex ? theHex : '' };
+        }
+        return undefined;
+    };
     Ramen.prototype.unfocusConnection = function () {
         var theConnection = this.theFocusedConnection;
         if (theConnection) {

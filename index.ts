@@ -82,27 +82,58 @@ import { Ramen } from './src/Ramen';
     }
 
     let focus = (hex: string) => {
-        if(/[0-9a-f]{8}/.test(hex) === false) {
-            console.log('Please enter a valid hex string, it should be 8 characters');
+        if(/[0-9a-f]{8}/.test(hex) === false && /\d+/.test(hex) === false) {
+            console.log('Please enter a number, or a valid hex string, it should be 8 characters');
             replServer.displayPrompt();
             return undefined;
         }
-        if(ramen.getConnectionByHex(hex) === undefined) {
-            console.log(`Cannot find the connection "${ colors.green(hex) }". Please use "${ colors.green('.list connections') }"`);
-            replServer.displayPrompt();
-            return undefined;
-        } else {
-            let websocket = ramen.focusOnConnection(hex);
 
-            if(websocket) {
-                replServer.setPrompt(`${hex}> `);
-                replServer.log(`"${ colors.green(hex) }" is focused!`);
-
-                websocket.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
-                    replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+        let findByHex = () => {
+            if(ramen.getConnectionByHex(hex) === undefined) {
+                console.log(`Cannot find the connection "${ colors.green(hex) }". Please use "${ colors.green('.list connections') }"`);
+                replServer.displayPrompt();
+                return undefined;
+            } else {
+                let websocket = ramen.focusOnConnection(hex);
+    
+                if(websocket) {
+                    replServer.setPrompt(`${hex}> `);
+                    replServer.log(`"${ colors.green(hex) }" is focused!`);
+    
+                    websocket.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
+                        replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+                    }
+    
                 }
-
             }
+        }
+
+        let findByIndex = () => {
+            let index = parseInt(hex);
+            let socketPair = ramen.focusOnConnectionByIndex(index);
+            if(socketPair === undefined) {
+                console.log(`Cannot find the connection`);
+                replServer.displayPrompt();
+                return undefined;
+            } else {
+                let websocket = socketPair.socket;
+
+                if(websocket) {
+                    replServer.setPrompt(`${socketPair.hex}> `);
+                    replServer.log(`"${ colors.green(socketPair.hex) }" is focused!`);
+    
+                    websocket.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
+                        replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+                    }
+    
+                }
+            }
+        }
+
+        if(/[0-9a-f]{8}/.test(hex) === true) {
+            findByHex();
+        } else if(/\d+/.test(hex) === true) {
+            findByIndex();
         }
     }
 
@@ -241,7 +272,7 @@ import { Ramen } from './src/Ramen';
         .setCommand('list', list, HELP.get('list') )
         .setCommand('ls', list, HELP.get('list') )
         .setCommand('focus', focus, HELP.get('focus') )
-        .setCommand('fcs', focus, HELP.get('focus') )
+        .setCommand('f', focus, HELP.get('focus') )
         .setCommand('close', close, HELP.get('close') )
         .setCommand('cls', close, HELP.get('close') )
         .setCommand('unfocus', unfocus, HELP.get('unfocus') )

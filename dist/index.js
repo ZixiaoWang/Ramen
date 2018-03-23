@@ -37,7 +37,7 @@ var Ramen_1 = require("./src/Ramen");
         ["list", "\r\t\t" + colors.green('[SOCKET]') + " List all the Servers.\n\t\talias " + colors.green('.ls') + "\n\t\te.g. " + colors.green('.list servers') + " or " + colors.green('.list connections') + " or " + colors.green('.ls c')],
         ["focus", "\r\t\t" + colors.green('[SOCKET]') + " Use a specific Connection by entering the hex string.\n\t\talias " + colors.green('.fcs') + "\n\t\te.g. " + colors.green('.focus 23de7a13') + " or " + colors.green('.fcs 23de7a13')],
         ["unfocus", "\r\t\t" + colors.green('[SOCKET]') + " Unfocus the connections. \n\t\t.e.g. " + colors.green('.unfocus')],
-        ["send", "\r\t\t" + colors.green('[SOCKET]') + " Send message. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
+        ["send", "\r\t\t" + colors.green('[SOCKET]') + " Send message. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\talias " + colors.green('.s') + "\n\t\te.g." + colors.green('.send "Hello World"') + " or " + colors.green('.s "Hello World"')],
         ["broadcast", "\r\t\t" + colors.green('[SOCKET]') + " Broadcast the arguments (string) to all connected clients. \n\t\te.g. " + colors.green('.broadcast Hello World')],
         ["close", "\r\t\t" + colors.green('[SOCKET]') + " Close the a specific connection by hex, or use \"" + colors.green('--all') + " to close all the existing connections\". \n\t\talias " + colors.green('.cls') + "\n\t\te.g. " + colors.green('.close <hex> | --all') + " or " + colors.green('.cls --all')],
         ["shutdown", "\r\t\t" + colors.green('[SOCKET]') + " Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
@@ -72,25 +72,52 @@ var Ramen_1 = require("./src/Ramen");
         }
     };
     var focus = function (hex) {
-        if (/[0-9a-f]{8}/.test(hex) === false) {
-            console.log('Please enter a valid hex string, it should be 8 characters');
+        if (/[0-9a-f]{8}/.test(hex) === false && /\d+/.test(hex) === false) {
+            console.log('Please enter a number, or a valid hex string, it should be 8 characters');
             replServer.displayPrompt();
             return undefined;
         }
-        if (ramen.getConnectionByHex(hex) === undefined) {
-            console.log("Cannot find the connection \"" + colors.green(hex) + "\". Please use \"" + colors.green('.list connections') + "\"");
-            replServer.displayPrompt();
-            return undefined;
-        }
-        else {
-            var websocket = ramen.focusOnConnection(hex);
-            if (websocket) {
-                replServer.setPrompt(hex + "> ");
-                replServer.log("\"" + colors.green(hex) + "\" is focused!");
-                websocket.onmessage = function (event) {
-                    replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
-                };
+        var findByHex = function () {
+            if (ramen.getConnectionByHex(hex) === undefined) {
+                console.log("Cannot find the connection \"" + colors.green(hex) + "\". Please use \"" + colors.green('.list connections') + "\"");
+                replServer.displayPrompt();
+                return undefined;
             }
+            else {
+                var websocket = ramen.focusOnConnection(hex);
+                if (websocket) {
+                    replServer.setPrompt(hex + "> ");
+                    replServer.log("\"" + colors.green(hex) + "\" is focused!");
+                    websocket.onmessage = function (event) {
+                        replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
+                    };
+                }
+            }
+        };
+        var findByIndex = function () {
+            var index = parseInt(hex);
+            var socketPair = ramen.focusOnConnectionByIndex(index);
+            if (socketPair === undefined) {
+                console.log("Cannot find the connection");
+                replServer.displayPrompt();
+                return undefined;
+            }
+            else {
+                var websocket = socketPair.socket;
+                if (websocket) {
+                    replServer.setPrompt(socketPair.hex + "> ");
+                    replServer.log("\"" + colors.green(socketPair.hex) + "\" is focused!");
+                    websocket.onmessage = function (event) {
+                        replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
+                    };
+                }
+            }
+        };
+        if (/[0-9a-f]{8}/.test(hex) === true) {
+            findByHex();
+        }
+        else if (/\d+/.test(hex) === true) {
+            findByIndex();
         }
     };
     var unfocus = function () {
@@ -220,15 +247,17 @@ var Ramen_1 = require("./src/Ramen");
         .setCommand('list', list, HELP.get('list'))
         .setCommand('ls', list, HELP.get('list'))
         .setCommand('focus', focus, HELP.get('focus'))
-        .setCommand('fcs', focus, HELP.get('focus'))
-        .setCommand('unfocus', unfocus, HELP.get('unfocus'))
-        .setCommand('send', send, HELP.get('send'))
-        .setCommand('ping', ping, HELP.get('ping'))
-        .setCommand('broadcast', broadcast, HELP.get('broadcase'))
+        .setCommand('f', focus, HELP.get('focus'))
         .setCommand('close', close, HELP.get('close'))
         .setCommand('cls', close, HELP.get('close'))
+        .setCommand('unfocus', unfocus, HELP.get('unfocus'))
+        .setCommand('send', send, HELP.get('send'))
+        .setCommand('s', send, HELP.get('send'))
+        .setCommand('ping', ping, HELP.get('ping'))
+        .setCommand('broadcast', broadcast, HELP.get('broadcase'))
         .setCommand('shutdown', shutdown, HELP.get('shutdown'))
         .setCommand('--help', showHelp, HELP.get('--help'))
+        .setCommand('h', showHelp, HELP.get('--help'))
         .console(defaultPrompt);
 })();
 // program

@@ -156,6 +156,48 @@ export class Ramen {
         return undefined;
     }
 
+    focusOnConnectionByIndex(index: number): { socket: WebSocket, hex: string } | undefined {
+        let theIndex = index;
+        let theMap;
+        let theHex;
+        let theConnection;
+        let connectionInterator = this.connectionsMap.values();
+
+        for(let i=0; i<this.connectionsMap.size; i++) {
+            let hexMap = connectionInterator.next().value;
+            if(hexMap.size <= theIndex) {
+                theMap = hexMap;
+                break;
+            }
+            theIndex -= hexMap.size;
+            continue;
+        }
+
+        if(theMap === undefined) {
+            this.outputer.log('The index is out of range');
+            return undefined;
+        }
+
+        let clientInterator = theMap.entries();
+
+        for(let i=0; i<theMap.size; i++) {
+            let client = clientInterator.next().value;
+            if( i === theIndex - 1) {
+                theHex = client[0] as string;
+                theConnection = client[1] as WebSocket;
+                break;
+            }
+            continue;
+        }
+
+        if(theConnection) {
+            this.theFocusedConnection = theConnection;
+            return { socket: theConnection, hex: theHex ? theHex : '' };
+        }
+
+        return undefined;
+    }
+
     unfocusConnection(): boolean {
         let theConnection: WebSocket | null = this.theFocusedConnection as WebSocket;
         if(theConnection) {
