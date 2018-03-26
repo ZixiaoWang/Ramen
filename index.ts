@@ -101,7 +101,11 @@ import { Ramen } from './src/Ramen';
                     replServer.log(`"${ colors.green(hex) }" is focused!`);
     
                     websocket.onmessage = (event: {data: WebSocket.Data, type: string, target: WebSocket}) => {
-                        replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+                        if(typeof event.data === 'string') {
+                            replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data }`);
+                        } else {
+                            replServer.log(`[${ colors.yellow('RECIEVE') }] ${ event.data.toString() }`);
+                        }
                     }
     
                 }

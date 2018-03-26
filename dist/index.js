@@ -89,7 +89,12 @@ var Ramen_1 = require("./src/Ramen");
                     replServer.setPrompt(hex + "> ");
                     replServer.log("\"" + colors.green(hex) + "\" is focused!");
                     websocket.onmessage = function (event) {
-                        replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
+                        if (typeof event.data === 'string') {
+                            replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data);
+                        }
+                        else {
+                            replServer.log("[" + colors.yellow('RECIEVE') + "] " + event.data.toString());
+                        }
                     };
                 }
             }

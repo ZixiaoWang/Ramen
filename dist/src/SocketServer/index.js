@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var WebSocket = require("ws");
 var colors = require("colors");
+var ip = require("ip");
 var SocketServer = /** @class */ (function () {
     function SocketServer() {
         this.DEFAULT_PORT = 5000;
@@ -44,7 +45,7 @@ var SocketServer = /** @class */ (function () {
     };
     SocketServer.prototype.address = function () {
         if (this.$$server) {
-            return this.$$server.address();
+            return { address: ip.address(), family: '', port: this.$$server.options.port };
         }
         else {
             return { address: "", family: "", port: undefined };

@@ -1,6 +1,7 @@
-import * as WebSocket from 'ws';
+import * as WebSocket       from 'ws';
 import * as colors          from 'colors';
 import * as http            from 'http';
+import * as ip              from 'ip';
 
 import { SocketServerOptions, Address } from './index.interface';
 
@@ -62,7 +63,7 @@ export class SocketServer {
 
     address(): Address {
         if(this.$$server) {
-            return this.$$server.address();
+            return { address: ip.address(), family: '', port: this.$$server.options.port };
         } else {
             return { address: "", family: "", port: undefined };
         }
