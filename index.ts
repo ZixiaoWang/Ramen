@@ -46,6 +46,7 @@ import { Ramen } from './src/Ramen';
         ["focus", `\r\t\t${ colors.green('[SOCKET]') } Use a specific Connection by entering the hex string, or its index.\n\t\talias ${ colors.green('.f') }\n\t\te.g. ${ colors.green('.focus 23de7a13') } or ${ colors.green('.f 1') }`],
         ["unfocus", `\r\t\t${ colors.green('[SOCKET]') } Unfocus the connections. \n\t\talias ${ colors.green('.uf <hex | index>') }\n\t\t.e.g. ${ colors.green('.unfocus') }`],
         ["send", `\r\t\t${ colors.green('[SOCKET]') } Send message. This operation requires an focused connection, otherwise plase use "${ colors.green('.broadcast <message>') }".\n\t\talias ${ colors.green('.s') }\n\t\te.g.${ colors.green('.send "Hello World"') } or ${ colors.green('.s "Hello World"') }`],
+        ["mirror", `\r\t\t${ colors.green('[SOCKET]')} Response with whatever recieved from client. This operation requires an focused connection.\n\t\te.g. ${ colors.green('.mirror') }`],
         ["broadcast", `\r\t\t${ colors.green('[SOCKET]') } Broadcast the arguments (string) to all connected clients. \n\t\te.g. ${ colors.green('.broadcast Hello World') }`],
         ["close", `\r\t\t${ colors.green('[SOCKET]') } Close the a specific connection by hex, or use "${ colors.green('--all') } to close all the existing connections". \n\t\talias ${ colors.green('.cls') }\n\t\te.g. ${ colors.green('.close <hex> | --all') } or ${ colors.green('.cls --all') }`],
         ["shutdown", `\r\t\t${ colors.green('[SOCKET]') } Shut down one or more specific server. \n\t\te.g. ${ colors.green('.shutdown [...serverName]') }`],
@@ -162,6 +163,26 @@ import { Ramen } from './src/Ramen';
         let theConnection = ramen.getTheFocusedConnection() as WebSocket;
         theConnection.send(data);
         replServer.displayPrompt();
+    }
+
+    let mirror = () => {
+        if(ramen.getTheFocusedConnection() === undefined) {
+            console.log(`You have to focus on one connection to send messages. please use "${ colors.green(".focus <hex>") }" or "${ colors.green('.broadcast <message>') }" to broadcast to all connections`);
+            replServer.displayPrompt();
+            return undefined;
+        }
+
+        replServer.displayPrompt();
+        let theConnection = ramen.getTheFocusedConnection() as WebSocket;
+        theConnection.onmessage = (event: { type: string, data: any, target: WebSocket }) => {
+            let data = event.data;
+            if(typeof data === 'string') {
+                data = data.toString();
+            }
+            replServer.log(`[${ colors.yellow('GET & SEND') }] ${data}`);
+            theConnection.send(data);
+            replServer.displayPrompt();
+        };
     }
 
     let ping = () => {
@@ -290,6 +311,7 @@ import { Ramen } from './src/Ramen';
         .setCommand('uf', unfocus, HELP.get('unfocus') )
         .setCommand('send', send, HELP.get('send') )
         .setCommand('s', send, HELP.get('send') )
+        .setCommand('mirror', mirror, HELP.get('mirror') )
         .setCommand('ping', ping, HELP.get('ping') )
         .setCommand('broadcast', broadcast, HELP.get('broadcase') )
         
