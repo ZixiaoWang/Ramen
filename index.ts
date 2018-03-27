@@ -174,13 +174,23 @@ import { Ramen } from './src/Ramen';
 
         replServer.displayPrompt();
         let theConnection = ramen.getTheFocusedConnection() as WebSocket;
-        theConnection.onmessage = (event: { type: string, data: any, target: WebSocket }) => {
+        theConnection.onmessage = function(event: { type: string, data: any, target: WebSocket }){
             let data = event.data;
-            if(typeof data === 'string') {
-                data = data.toString();
+            let type: string = 'string';
+
+            switch(typeof event.data) {
+                case 'string': 
+                    this.binaryType = 'string';
+                    break;
+                case 'object':
+                    type = theConnection.binaryType;
+                    break;
+                default:
+                    this.binaryType = 'string';
             }
-            replServer.log(`[${ colors.yellow('GET & SEND') }] ${data}`);
-            theConnection.send(data);
+
+            console.log(`[${ colors.yellow('GET & SEND') }] [TYPE: ${ colors.cyan(type) }] ${ data.toString() }`);
+            this.send(data);
             replServer.displayPrompt();
         };
     }

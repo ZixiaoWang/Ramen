@@ -158,11 +158,19 @@ var Ramen_1 = require("./src/Ramen");
         var theConnection = ramen.getTheFocusedConnection();
         theConnection.onmessage = function (event) {
             var data = event.data;
-            if (typeof data === 'string') {
-                data = data.toString();
+            var type = 'string';
+            switch (typeof event.data) {
+                case 'string':
+                    this.binaryType = 'string';
+                    break;
+                case 'object':
+                    type = theConnection.binaryType;
+                    break;
+                default:
+                    this.binaryType = 'string';
             }
-            replServer.log("[" + colors.yellow('GET & SEND') + "] " + data);
-            theConnection.send(data);
+            console.log("[" + colors.yellow('GET & SEND') + "] [TYPE: " + colors.cyan(type) + "] " + data.toString());
+            this.send(data);
             replServer.displayPrompt();
         };
     };
