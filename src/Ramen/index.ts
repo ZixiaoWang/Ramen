@@ -35,7 +35,15 @@ export class Ramen {
         return this;
     }
 
-    createSocketServer(name?: string){
+    setServerCount(count: number): void {
+        this.SERVER_COUNT = count;
+    }
+
+    setPortCount(count: number): void {
+        this.PORT = count;
+    }
+
+    createSocketServer(name?: string): SocketServer | undefined{
         let serverName = name || 'server' + (this.SERVER_COUNT++);
 
         if(this.serverMap.has(serverName) === true) {
@@ -74,6 +82,8 @@ export class Ramen {
                 this.outputer.log(`New Client ${ colors.green(remoteAddress) } has connected with ${ colors.green(serverName) }.`);
             })
             .createServer(this.PORT);
+
+        return socketServer;
     }
 
     listAllServers() {
@@ -82,6 +92,13 @@ export class Ramen {
 
     listAllConnections() {
         tablifyConnections(this.connectionsMap);
+    }
+
+    getBasicInfo(): any {
+        return { 
+            serverCount: this.SERVER_COUNT,
+            portCount: this.PORT
+         }
     }
 
     getServerByName(name: string): undefined | SocketServer{

@@ -26,6 +26,12 @@ var Ramen = /** @class */ (function () {
         this.outputer = outputer;
         return this;
     };
+    Ramen.prototype.setServerCount = function (count) {
+        this.SERVER_COUNT = count;
+    };
+    Ramen.prototype.setPortCount = function (count) {
+        this.PORT = count;
+    };
     Ramen.prototype.createSocketServer = function (name) {
         var _this = this;
         var serverName = name || 'server' + (this.SERVER_COUNT++);
@@ -59,12 +65,19 @@ var Ramen = /** @class */ (function () {
             _this.outputer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
         })
             .createServer(this.PORT);
+        return socketServer;
     };
     Ramen.prototype.listAllServers = function () {
         tablify_1.tablifyServers(this.serverMap, this.connectionsMap);
     };
     Ramen.prototype.listAllConnections = function () {
         tablify_1.tablifyConnections(this.connectionsMap);
+    };
+    Ramen.prototype.getBasicInfo = function () {
+        return {
+            serverCount: this.SERVER_COUNT,
+            portCount: this.PORT
+        };
     };
     Ramen.prototype.getServerByName = function (name) {
         if (name === undefined) {

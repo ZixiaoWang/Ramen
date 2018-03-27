@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var WebSocket = require("ws");
 var colors = require("colors");
+var js_crc_1 = require("js-crc");
 var REPL_1 = require("./src/REPL");
 var SocketServer_1 = require("./src/SocketServer");
 var Ramen_1 = require("./src/Ramen");
@@ -43,6 +44,7 @@ var Ramen_1 = require("./src/Ramen");
         ["close", "\r\t\t" + colors.green('[SOCKET]') + " Close the a specific connection by hex, or use \"" + colors.green('--all') + " to close all the existing connections\". \n\t\talias " + colors.green('.cls') + "\n\t\te.g. " + colors.green('.close <hex> | --all') + " or " + colors.green('.cls --all')],
         ["shutdown", "\r\t\t" + colors.green('[SOCKET]') + " Shut down one or more specific server. \n\t\te.g. " + colors.green('.shutdown [...serverName]')],
         ["ping", "\r\t\t" + colors.green('[SOCKET]') + " Send a ping to the focused client. This operation requires an focused connection, otherwise plase use \"" + colors.green('.broadcast <message>') + "\".\n\t\te.g." + colors.green('.send "Hello World"')],
+        ['mirrorServer', "\r\t\t" + colors.magenta('[HIDDEN]') + " Quickly setup a mirror server which reflect all the message recieved from client side"],
         ["--help", "\r\t\t" + colors.green('[SOCKET]') + " Showing all the costomized commands."]
     ]);
     var replServer = new REPL_1.REPL();
@@ -276,6 +278,61 @@ var Ramen_1 = require("./src/Ramen");
         });
         replServer.displayPrompt();
     };
+    // Followings are customized commands
+    // Basically you don't really need them, but
+    // anyway, I just put them there.
+    var mirrorServer = function (arg) {
+        replServer.log(colors.yellow('NOTE: This is mirror mode, all the connection will automatically return whatever it recieves'));
+        var serverCount = ramen.getBasicInfo().serverCount;
+        var portCount = ramen.getBasicInfo().portCount;
+        var serverName = 'Mirror' + serverCount;
+        while (ramen.serverMap.has(serverName)) {
+            serverName = 'Mirror' + ++serverCount;
+        }
+        var socketServer = new SocketServer_1.SocketServer();
+        socketServer
+            .setOnCreateCallback(function () {
+            ramen.serverMap.set(serverName, socketServer);
+            ramen.setPortCount(portCount);
+            ramen.setServerCount(serverCount);
+            replServer.log("Server " + colors.green(serverName) + " is listening to port " + colors.green(portCount.toString()));
+        })
+            .setOnConnectionCallback(function (websocket, request) {
+            if (ramen.connectionsMap.get(socketServer) === undefined) {
+                ramen.connectionsMap.set(socketServer, new Map());
+            }
+            var connection = ramen.connectionsMap.get(socketServer) || new Map();
+            var remoteAddress = request.connection.remoteAddress || 'undefined';
+            var hexString = js_crc_1.crc32((Date.now() + Math.random()).toString());
+            Object.defineProperty(websocket, 'hex', { value: hexString, writable: false, enumerable: false });
+            websocket.url = remoteAddress;
+            connection.set(hexString, websocket);
+            websocket.onmessage = function (event) {
+                var data = event.data;
+                var type = 'string';
+                switch (typeof event.data) {
+                    case 'string':
+                        websocket.binaryType = 'string';
+                        break;
+                    case 'object':
+                        type = websocket.binaryType;
+                        break;
+                    default:
+                        websocket.binaryType = 'string';
+                }
+                console.log("[" + colors.yellow('GET & SEND') + "] [TYPE: " + colors.cyan(type) + "] " + data.toString());
+                websocket.send(data);
+                replServer.displayPrompt();
+            };
+            websocket.onclose = function (event) {
+                connection.delete(hexString);
+                replServer.setPrompt(defaultPrompt);
+                replServer.log("[" + colors.yellow('CLOSED') + "] Connection has closed, the reason is \"" + event.reason + "\"");
+            };
+            replServer.log("New Client " + colors.green(remoteAddress) + " has connected with " + colors.green(serverName) + ".");
+        })
+            .createServer(portCount);
+    };
     replServer
         .setVariable('SocketServer', SocketServer_1.SocketServer)
         .setVariable('WebSocket', WebSocket)
@@ -296,6 +353,7 @@ var Ramen_1 = require("./src/Ramen");
         .setCommand('mirror', mirror, HELP.get('mirror'))
         .setCommand('ping', ping, HELP.get('ping'))
         .setCommand('broadcast', broadcast, HELP.get('broadcase'))
+        .setCommand('mserver', mirrorServer, HELP.get('mirrorServer'))
         .setCommand('shutdown', shutdown, HELP.get('shutdown'))
         .setCommand('--help', showHelp, HELP.get('--help'))
         .setCommand('h', showHelp, HELP.get('--help'))
