@@ -293,7 +293,7 @@ var Ramen_1 = require("./src/Ramen");
         socketServer
             .setOnCreateCallback(function () {
             ramen.serverMap.set(serverName, socketServer);
-            ramen.setPortCount(portCount);
+            ramen.setPortCount(portCount + 1);
             ramen.setServerCount(serverCount);
             replServer.log("Server " + colors.green(serverName) + " is listening to port " + colors.green(portCount.toString()));
         })
@@ -309,18 +309,21 @@ var Ramen_1 = require("./src/Ramen");
             connection.set(hexString, websocket);
             websocket.onmessage = function (event) {
                 var data = event.data;
+                var presentData = '';
                 var type = 'string';
                 switch (typeof event.data) {
                     case 'string':
                         websocket.binaryType = 'string';
+                        presentData = data;
                         break;
                     case 'object':
                         type = websocket.binaryType;
+                        presentData = new Int8Array(event.data).toString();
                         break;
                     default:
                         websocket.binaryType = 'string';
                 }
-                console.log("[" + colors.yellow('GET & SEND') + "] [TYPE: " + colors.cyan(type) + "] " + data.toString());
+                console.log("[" + colors.yellow('GET & SEND') + "] [TYPE: " + colors.cyan(type) + "] " + presentData.toString());
                 websocket.send(data);
                 replServer.displayPrompt();
             };
