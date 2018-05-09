@@ -5,7 +5,7 @@ import { ReplOptions, REPLServer } from 'repl';
 
 export class REPL {
 
-    private replServer: REPLServer;
+    private replServer: REPLServer|undefined = undefined;
     private replOptions: ReplOptions = {};
     private commandList: Array<any> = [];
     private variablesList: Map<string, any> = new Map();
@@ -18,7 +18,7 @@ export class REPL {
 
             // 綁定command
             this.commandList.forEach(command => {
-                this.replServer.defineCommand(command.cmd, {
+                this.replServer!.defineCommand(command.cmd, {
                     help: command.help,
                     action: (...args: Array<any>) => {
                         command.action.apply(this, args);
@@ -29,7 +29,7 @@ export class REPL {
             // 綁定variable
             this.variablesList.forEach((descriptor, key) => {
                 Object.defineProperty(
-                    this.replServer.context,
+                    this.replServer!.context,
                     key,
                     descriptor
                 );

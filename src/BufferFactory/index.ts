@@ -2,8 +2,8 @@ import { is } from '../Utils/Is';
 
 export class BufferFactory {
 
-    private $isProtocalSet: boolean;
-    private $isSequenceSet: boolean;
+    private $isProtocalSet: boolean = false;
+    private $isSequenceSet: boolean = false;
 
     private $$writePosition: number = 0;
     private $body: DataView;

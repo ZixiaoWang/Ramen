@@ -8,7 +8,7 @@ import { SocketServerOptions, Address } from './index.interface';
 export class SocketServer {
 
     private DEFAULT_PORT: number = 5000;
-    private $$server: WebSocket.Server;
+    private $$server: WebSocket.Server | undefined = undefined;
     private $$port: number;
 
     public clients: Set<any | WebSocket>;
@@ -84,7 +84,7 @@ export class SocketServer {
     }
 
     close(callback?: () => void): any{
-        this.$$server.close(callback);
+        this.$$server!.close(callback);
     }
 
     getNativeServer(): any {
@@ -96,7 +96,7 @@ export class SocketServer {
     }
 
     getAllClients(): Set<any> {
-        return this.$$server.clients || undefined;
+        return this.$$server!.clients || undefined;
     }
 
     private oncreate() {

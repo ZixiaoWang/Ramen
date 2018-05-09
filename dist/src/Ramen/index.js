@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var colors = require("colors");
 var js_crc_1 = require("js-crc");
 var _1 = require("../SocketServer/");
-var tablify_1 = require("../Utils/tablify");
+var Tablify_1 = require("../Utils/Tablify");
 var Ramen = /** @class */ (function () {
     function Ramen() {
         this.PORT = 5000;
@@ -68,10 +68,10 @@ var Ramen = /** @class */ (function () {
         return socketServer;
     };
     Ramen.prototype.listAllServers = function () {
-        tablify_1.tablifyServers(this.serverMap, this.connectionsMap);
+        Tablify_1.tablifyServers(this.serverMap, this.connectionsMap);
     };
     Ramen.prototype.listAllConnections = function () {
-        tablify_1.tablifyConnections(this.connectionsMap);
+        Tablify_1.tablifyConnections(this.connectionsMap);
     };
     Ramen.prototype.getBasicInfo = function () {
         return {
