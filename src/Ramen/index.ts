@@ -6,7 +6,7 @@ import { crc32 } from 'js-crc';
 
 import { REPL } from '../REPL/';
 import { SocketServer } from '../SocketServer/';
-import { tablifyServers, tablifyConnections } from '../Utils/tablify';
+import { tablifyServers, tablifyConnections } from '../Utils/Tablify';
 
 export class Ramen {
 
